@@ -1,73 +1,48 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!--
-    TAILWIND NOTE: calc() still works inside Tailwind's style="" attribute.
-    We use style="height: calc(100vh - 64px)" so the map fills the remaining
-    screen height after the 64px header.
 
-    flex-col lg:flex-row = stacks vertically on mobile, side-by-side on desktop
--->
+<!-- Leaflet CSS — the free open-source map library -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <div class="flex flex-col lg:flex-row w-full" style="height: calc(100vh - 64px);">
 
-    <!-- ============================================
-         LEFT SIDEBAR
-         w-96 = 384px fixed width on desktop (shrink-0 prevents it from shrinking)
-         z-20 = sits above map layer (z-index 20)
-    ============================================ -->
+    <!-- LEFT SIDEBAR -->
     <div class="w-full lg:w-96 bg-white border-r border-gray-200 shadow-xl z-20 flex flex-col h-full shrink-0">
 
-        <!-- ---- Sidebar Header ---- -->
         <div class="p-6 border-b border-gray-100 bg-[#582C83]">
             <a href="{{ url_for('index') }}" class="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-medium mb-5 transition">
                 ← Dashboard
             </a>
 
-            <!-- Next stop info -->
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-1">Next Stop</p>
-                    <h2 class="text-2xl font-bold text-white leading-tight">McClurg Dining</h2>
-                    <p class="text-white/50 text-xs mt-1">0.4 miles away · Main Loop</p>
+                    <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-1">Your Location</p>
+                    <h2 class="text-2xl font-bold text-white leading-tight" id="locationName">Locating...</h2>
+                    <p class="text-white/50 text-xs mt-1" id="coordsDisplay">Waiting for GPS</p>
                 </div>
-                <!--
-                    This is the ETA badge on the right side of the header.
-                    text-right aligns the content to the right.
-                -->
                 <div class="text-right">
-                    <p class="text-4xl font-black text-[#C8A051] font-mono leading-none">3</p>
-                    <p class="text-white/60 text-xs font-semibold uppercase">min</p>
+                    <p class="text-4xl font-black text-[#C8A051] font-mono leading-none" id="accuracyDisplay">—</p>
+                    <p class="text-white/60 text-xs font-semibold uppercase">meters</p>
                 </div>
             </div>
 
-            <!-- Status bar under the title -->
             <div class="mt-4 flex items-center gap-3">
-                <span class="px-3 py-1 bg-green-500/20 border border-green-400/30 text-green-300 font-bold text-xs rounded-full uppercase tracking-wide">
-                    ✓ On Time
+                <!-- GPS status badge — changes color based on signal -->
+                <span id="gpsBadge" class="px-3 py-1 bg-yellow-500/20 border border-yellow-400/30 text-yellow-300 font-bold text-xs rounded-full uppercase tracking-wide">
+                    ⌛ Acquiring GPS
                 </span>
-                <span class="text-white/50 text-xs">Updated just now</span>
+                <span class="text-white/50 text-xs" id="lastUpdate">—</span>
             </div>
         </div>
 
-        <!-- ---- Route Timeline ---- -->
+        <!-- Upcoming Route (static for now, connect to backend later) -->
         <div class="p-6 overflow-y-auto flex-grow">
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Upcoming Route</p>
 
-            <!--
-                This is a "timeline" component.
-                border-l-2 = left vertical line (the timeline track)
-                ml-4 = indents the line 16px from the left
-                space-y-8 = 32px vertical space between each stop
-            -->
             <div class="relative border-l-2 border-gray-200 ml-5 space-y-8">
 
-                <!-- Stop 1 — ACTIVE (gold dot) -->
                 <div class="relative pl-7">
-                    <!--
-                        absolute = positioned relative to parent
-                        -left-[11px] = pulls it 11px left so it sits ON the border line
-                        The border-4 border-white creates a "halo" effect
-                    -->
                     <div class="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-[#C8A051] border-4 border-white shadow-md ring-2 ring-[#C8A051]/30"></div>
                     <div class="bg-[#582C83]/5 border border-[#582C83]/10 rounded-xl p-3">
                         <div class="flex justify-between items-start">
@@ -80,7 +55,6 @@
                     </div>
                 </div>
 
-                <!-- Stop 2 -->
                 <div class="relative pl-7 opacity-70">
                     <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
                     <div class="rounded-xl p-3">
@@ -94,7 +68,6 @@
                     </div>
                 </div>
 
-                <!-- Stop 3 -->
                 <div class="relative pl-7 opacity-50">
                     <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-200 border-2 border-white"></div>
                     <div class="rounded-xl p-3">
@@ -108,27 +81,13 @@
                     </div>
                 </div>
 
-                <!-- Stop 4 -->
-                <div class="relative pl-7 opacity-40">
-                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-200 border-2 border-white"></div>
-                    <div class="rounded-xl p-3">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold text-gray-600 text-sm">All Saints' Chapel</p>
-                                <p class="text-xs text-gray-400 mt-0.5">University Ave</p>
-                            </div>
-                            <span class="text-gray-400 font-bold font-mono text-sm">15m</span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <!-- ---- Sidebar Footer Actions ---- -->
+        <!-- Bottom Actions -->
         <div class="p-4 border-t border-gray-100 bg-gray-50 grid grid-cols-2 gap-3">
-            <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#582C83] text-white text-sm font-semibold hover:bg-[#6d35a0] transition">
-                🔔 Notify Me
+            <button onclick="centerOnMe()" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#582C83] text-white text-sm font-semibold hover:bg-[#6d35a0] transition">
+                🎯 Center Me
             </button>
             <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition">
                 ⚠️ Report
@@ -137,52 +96,236 @@
 
     </div>
 
-    <!-- ============================================
-         RIGHT SIDE — MAP AREA
-         flex-grow = takes all remaining horizontal space
-         relative = anchor point for absolute children
-    ============================================ -->
-    <div class="relative flex-grow bg-gray-200 h-full"
-         style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1920&q=80');
-                background-size: cover;
-                background-position: center;">
+    <!-- RIGHT SIDE — REAL MAP -->
+    <!-- 
+        id="map" is what Leaflet targets to inject the map into.
+        The div just needs a defined height — flex-grow handles that here.
+    -->
+    <div id="map" class="flex-grow h-full z-10"></div>
 
-        <!-- Overlay tint -->
-        <div class="absolute inset-0 bg-[#582C83]/20"></div>
-
-        <!-- Live Bus Marker — centered on map -->
-        <!--
-            top-[45%] left-[55%] = positions roughly center of the map
-            -translate-x-1/2 -translate-y-1/2 = offsets by half the element's own size
-            so the center of the icon lands exactly on (45%, 55%)
-        -->
-        <div class="absolute top-[45%] left-[55%] -translate-x-1/2 -translate-y-1/2 z-20">
-            <div class="pulse-ring"></div>
-            <div class="w-14 h-14 bg-white border-4 border-[#582C83] rounded-full flex items-center justify-center shadow-2xl text-2xl relative z-20">
-                🚌
-            </div>
-        </div>
-
-        <!-- Top-right map controls (glass effect) -->
-        <div class="absolute top-4 right-4 flex flex-col gap-2 z-30">
-            <button class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white transition shadow-md">+</button>
-            <button class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white transition shadow-md">−</button>
-            <div class="w-full h-px bg-white/30 my-1"></div>
-            <button class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white transition shadow-md text-sm">🎯</button>
-        </div>
-
-        <!-- Bottom map info bar -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
-            <div class="glass-btn rounded-2xl px-5 py-3 flex items-center gap-4 shadow-lg">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="text-xs font-semibold text-gray-700">Main Loop Active</span>
-                </div>
-                <div class="w-px h-4 bg-gray-200"></div>
-                <span class="text-xs text-gray-500 font-mono">Last update: just now</span>
-            </div>
-        </div>
-
-    </div>
 </div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ============================================================
+// 1. INITIALIZE THE MAP
+//    L.map('map') targets the div with id="map"
+//    setView([lat, lng], zoom) — Sewanee, TN coordinates, zoom 15
+// ============================================================
+const map = L.map('map', {
+    zoomControl: false  // we'll add our own styled zoom control
+}).setView([35.2034, -85.9210], 15);
+
+// ============================================================
+// 2. ADD MAP TILES (the actual map imagery)
+//    OpenStreetMap is free and needs no API key.
+//    {z}/{x}/{y} are tile coordinates Leaflet fills in automatically.
+// ============================================================
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19
+}).addTo(map);
+
+// ============================================================
+// 3. CUSTOM ZOOM CONTROL — bottom right
+// ============================================================
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// ============================================================
+// 4. SEWANEE SHUTTLE STOPS — fixed markers on the map
+//    L.marker([lat, lng]) places a pin
+//    .bindPopup('text') adds a click popup
+//    .addTo(map) puts it on the map
+// ============================================================
+const stops = [
+    { name: "McClurg Dining Hall",    lat: 35.2048, lng: -85.9198 },
+    { name: "Fowler Center",          lat: 35.2071, lng: -85.9241 },
+    { name: "The SPO / Bookstore",    lat: 35.2032, lng: -85.9187 },
+    { name: "All Saints' Chapel",     lat: 35.2027, lng: -85.9220 },
+    { name: "Wellness Commons",       lat: 35.2055, lng: -85.9165 },
+    { name: "The BC",                 lat: 35.2018, lng: -85.9175 },
+    { name: "Humphreys",              lat: 35.2010, lng: -85.9200 },
+];
+
+// Custom stop icon (purple circle)
+const stopIcon = L.divIcon({
+    className: '',
+    html: `<div style="
+        width: 14px; height: 14px;
+        background: #582C83;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(88,44,131,0.4);
+    "></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+});
+
+stops.forEach(stop => {
+    L.marker([stop.lat, stop.lng], { icon: stopIcon })
+     .addTo(map)
+     .bindPopup(`<b style="color:#582C83">${stop.name}</b><br><small>Shuttle Stop</small>`);
+});
+
+// ============================================================
+// 5. YOUR LIVE LOCATION MARKER
+//    We create this once and then move it as GPS updates come in.
+// ============================================================
+let userMarker = null;
+let userCircle = null;  // accuracy radius circle
+let watchId = null;
+
+// Custom icon for the user — gold pulsing dot
+const userIcon = L.divIcon({
+    className: '',
+    html: `
+        <div class="my-location-dot">
+            <div class="my-location-pulse"></div>
+            <div class="my-location-center"></div>
+        </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+});
+
+// ============================================================
+// 6. GEOLOCATION — watchPosition fires every time you move
+//    Unlike getCurrentPosition (fires once), watchPosition
+//    continuously tracks and calls the callback with new coords.
+// ============================================================
+function startTracking() {
+    if (!navigator.geolocation) {
+        document.getElementById('locationName').textContent = 'GPS not supported';
+        document.getElementById('gpsBadge').textContent = '✗ No GPS';
+        document.getElementById('gpsBadge').className = 'px-3 py-1 bg-red-500/20 border border-red-400/30 text-red-300 font-bold text-xs rounded-full uppercase tracking-wide';
+        return;
+    }
+
+    // watchPosition: fires callback every time location updates
+    watchId = navigator.geolocation.watchPosition(
+    onLocationSuccess,
+    onLocationError,
+    {
+        enableHighAccuracy: true,
+        maximumAge: 0,        // ← was 5000; 0 forces a fresh reading every time
+        timeout: 15000        // ← give it a bit more time on mobile
+    }
+);
+}
+
+function onLocationSuccess(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const accuracy = Math.round(position.coords.accuracy); // in meters
+
+    const latlng = [lat, lng];
+
+    // --- Update or create the marker ---
+    if (userMarker) {
+        // If marker already exists, just move it
+        userMarker.setLatLng(latlng);
+        userCircle.setLatLng(latlng).setRadius(accuracy);
+    } else {
+        // First time: create the marker and accuracy circle
+        userMarker = L.marker(latlng, { icon: userIcon })
+            .addTo(map)
+            .bindPopup('<b style="color:#C8A051">📍 You are here</b>');
+
+        // The blue accuracy circle (how precise the GPS is)
+        userCircle = L.circle(latlng, {
+            radius: accuracy,
+            color: '#582C83',
+            fillColor: '#582C83',
+            fillOpacity: 0.08,
+            weight: 1,
+            dashArray: '4'
+        }).addTo(map);
+
+        // Center map on user the first time
+        map.setView(latlng, 16);
+    }
+
+    // --- Update sidebar info ---
+    document.getElementById('locationName').textContent = 'Live Tracking';
+    document.getElementById('coordsDisplay').textContent =
+        `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('accuracyDisplay').textContent = accuracy;
+    document.getElementById('lastUpdate').textContent =
+        'Updated ' + new Date().toLocaleTimeString();
+
+    // Warn if accuracy is terrible (IP-based geolocation on desktop)
+    if (accuracy > 500) {
+        const badge = document.getElementById('gpsBadge');
+        badge.textContent = `⚠️ Low accuracy (${accuracy}m) — use on mobile`;
+        badge.className = 'px-3 py-1 bg-yellow-500/20 border border-yellow-400/30 text-yellow-300 font-bold text-xs rounded-full uppercase tracking-wide';
+    }
+
+    // Update GPS badge to green
+    const badge = document.getElementById('gpsBadge');
+    badge.textContent = '✓ GPS Active';
+    badge.className = 'px-3 py-1 bg-green-500/20 border border-green-400/30 text-green-300 font-bold text-xs rounded-full uppercase tracking-wide';
+}
+
+function onLocationError(error) {
+    const badge = document.getElementById('gpsBadge');
+    let msg = 'GPS Error';
+
+    // error.code tells you exactly what went wrong
+    if (error.code === 1) msg = '✗ Permission Denied';       // user said no
+    else if (error.code === 2) msg = '✗ Position Unavailable'; // no signal
+    else if (error.code === 3) msg = '✗ GPS Timeout';         // took too long
+
+    badge.textContent = msg;
+    badge.className = 'px-3 py-1 bg-red-500/20 border border-red-400/30 text-red-300 font-bold text-xs rounded-full uppercase tracking-wide';
+    document.getElementById('locationName').textContent = 'Cannot locate';
+    document.getElementById('coordsDisplay').textContent = error.message;
+}
+
+// Button: snap map view back to your location
+function centerOnMe() {
+    if (userMarker) {
+        map.setView(userMarker.getLatLng(), 17);
+    }
+}
+
+// Kick off tracking when page loads
+startTracking();
+</script>
+
+<!-- Custom CSS for the pulsing location dot -->
+<style>
+.my-location-dot {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+.my-location-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    background: #C8A051;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(200,160,81,0.6);
+    z-index: 2;
+}
+.my-location-pulse {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px; height: 24px;
+    background: rgba(200,160,81,0.3);
+    border-radius: 50%;
+    animation: loc-pulse 2s infinite ease-out;
+    z-index: 1;
+}
+@keyframes loc-pulse {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+}
+</style>
+
 {% endblock %}
