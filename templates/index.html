@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    
+    <!-- Welcome Section -->
+    <div class="mb-10">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome to the Domain.</h1>
+        <p class="text-lg text-gray-500">Track shuttles, view schedules, and get across campus.</p>
+    </div>
+
+    <!-- Quick Access Desktop Grid -->
+    <section class="mb-12">
+        <h2 class="text-xl font-semibold text-black mb-6">Quick Access</h2>
+        
+        <!-- Responsive Grid: 1 col on mobile, 2 on tablet, 4 on desktop -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <a href="{{ url_for('view_map') }}" class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">📍</div>
+                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Live Map Tracker</span>
+            </a>
+            
+            <div class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">⏰</div>
+                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Shuttle Schedule</span>
+            </div>
+
+            <div class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">⚠️</div>
+                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Report Issue</span>
+            </div>
+
+            <div class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">📞</div>
+                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Contact SPO</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Two Column Desktop Layout for info -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        
+        <!-- Left Column: Upcoming Stops -->
+        <section>
+            <h2 class="text-xl font-semibold text-black mb-6">Route Status</h2>
+            <div class="bg-white border border-gray-200 rounded-[32px] p-8 shadow-sm">
+                <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+                    <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="font-bold text-gray-900 text-lg">Main Loop Active</span>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-6">
+                            <div class="w-12 h-12 rounded-full bg-[#582C83] flex items-center justify-center text-white font-bold">01</div>
+                            <span class="text-gray-900 font-semibold text-lg">McClurg Dining</span>
+                        </div>
+                        <span class="text-[#582C83] font-bold">3 min</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between group opacity-60">
+                        <div class="flex items-center gap-6">
+                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">02</div>
+                            <span class="text-gray-900 font-semibold text-lg">Fowler Center</span>
+                        </div>
+                        <span class="text-gray-500">10 min</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: System Alerts -->
+        <section>
+            <h2 class="text-xl font-semibold text-black mb-6">System Alerts</h2>
+            <div class="bg-gray-100 rounded-[32px] p-8 space-y-4 border border-gray-200">
+                <div class="bg-white p-4 rounded-2xl flex items-start gap-4 shadow-sm border-l-4 border-[#C8A051]">
+                    <div class="text-2xl mt-1">🚧</div>
+                    <div>
+                        <h4 class="font-bold text-gray-900">Roadwork on University Ave</h4>
+                        <p class="text-gray-600 text-sm mt-1">Expect slight delays near All Saints' Chapel due to ongoing construction.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

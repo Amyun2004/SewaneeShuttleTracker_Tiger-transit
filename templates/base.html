@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sewanee Transit</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-purple font-sans text-gray-900 flex flex-col min-h-screen">
+
+    <!-- Full-Width Desktop Navigation Bar -->
+    <header class="w-full bg-purple shadow-sm border-b border-black-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="{{ url_for('index') }}" class="text-2xl text-gray-800 tracking-tight">
+                Sewanee <span class="font-bold text-black">Transit</span>
+            </a>
+            
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('index') }}" class="text-sm font-medium text-gray-600 hover:text-black">Home</a>
+                <a href="{{ url_for('view_map') }}" class="text-sm font-medium text-gray-600 hover:text-black">Live Map</a>
+                <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition">
+                    🔔
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Website Content -->
+    <main class="flex-grow w-full">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

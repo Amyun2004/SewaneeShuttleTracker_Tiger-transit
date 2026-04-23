@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Use flexbox to put sidebar and map side-by-side -->
+<!-- calc(100vh - 64px) ensures it takes up the exact screen height minus the 64px header -->
+<div class="flex flex-col lg:flex-row w-full" style="height: calc(100vh - 64px);">
+    
+    <!-- LEFT SIDEBAR (Info Panel) -->
+    <div class="w-full lg:w-96 bg-white border-r border-gray-200 shadow-xl z-20 flex flex-col h-full shrink-0">
+        
+        <div class="p-6 border-b border-gray-100">
+            <a href="{{ url_for('index') }}" class="inline-block mb-4 text-sm text-gray-500 hover:text-black font-medium">
+                ← Back to Dashboard
+            </a>
+            <p class="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Next Stop</p>
+            <h2 class="text-3xl font-bold text-gray-900">McClurg Dining</h2>
+            
+            <div class="mt-4 flex items-end justify-between">
+                <div>
+                    <h3 class="text-4xl font-black text-[#582C83]">3 min</h3>
+                    <p class="text-gray-500 text-sm font-medium mt-1">0.4 miles away</p>
+                </div>
+                <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-full uppercase tracking-wide">On Time</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Stop List -->
+        <div class="p-6 overflow-y-auto flex-grow">
+            <h4 class="font-bold text-gray-900 mb-6">Upcoming Route</h4>
+            
+            <div class="relative border-l-2 border-gray-200 ml-4 space-y-8">
+                <!-- Stop 1 -->
+                <div class="relative pl-6">
+                    <div class="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-[#C8A051] border-4 border-white shadow-sm"></div>
+                    <h5 class="font-bold text-gray-900">McClurg Dining Hall</h5>
+                    <p class="text-sm text-gray-500">Arriving shortly</p>
+                </div>
+                
+                <!-- Stop 2 -->
+                <div class="relative pl-6">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
+                    <h5 class="font-semibold text-gray-600">The SPO / Bookstore</h5>
+                    <p class="text-sm text-gray-400">ETA: 6 mins</p>
+                </div>
+                
+                <!-- Stop 3 -->
+                <div class="relative pl-6">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
+                    <h5 class="font-semibold text-gray-600">Fowler Center</h5>
+                    <p class="text-sm text-gray-400">ETA: 10 mins</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE (The Map) -->
+    <div class="relative flex-grow bg-gray-200 h-full" style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;">
+        
+        <!-- Dark Overlay just to make the pin pop out -->
+        <div class="absolute inset-0 bg-[#582C83]/10"></div>
+
+        <!-- Fake Live Bus Marker (with your CSS pulse) -->
+        <div class="absolute top-[50%] left-[50%] z-20">
+            <div class="pulse-ring"></div>
+            <div class="absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white border-4 border-[#582C83] rounded-full flex items-center justify-center shadow-2xl z-20 text-2xl">
+                🚌
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+{% endblock %}

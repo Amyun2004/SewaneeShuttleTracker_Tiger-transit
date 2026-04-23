@@ -1,0 +1,78 @@
+/* =========================================
+   SEWANEE TRANSIT - CUSTOM STYLES
+   static/css/style.css
+========================================= */
+
+/* --- 1. Sewanee Brand Variables --- */
+:root {
+    --sewanee-purple: #582C83;
+    --sewanee-gold: #C8A051;
+    --dark-container: #1C1C1E;
+    --app-bg: #F9FAFB;
+}
+
+/* --- 2. Smooth Scrolling & Base --- */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- 3. Hide Scrollbars (For the horizontal scrolling tags) --- */
+/* This hides the ugly scrollbar but still lets you swipe/scroll */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* --- 4. Live Map Animations (For view.html) --- */
+/* The pulsing gold ring around the live bus icon */
+.pulse-ring {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(200, 160, 81, 0.5); /* Sewanee Gold with transparency */
+    border-radius: 50%;
+    animation: pulse-anim 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    z-index: 10;
+    /* Centers it perfectly behind a 48px bus icon */
+    top: 50%;
+    left: 50%;
+    margin-top: -30px; 
+    margin-left: -30px;
+}
+
+@keyframes pulse-anim {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}
+
+/* --- 5. UI Elements --- */
+/* The little grey pill at the top of the map bottom-sheet */
+.drag-handle {
+    width: 48px;
+    height: 6px;
+    background-color: #D1D5DB;
+    border-radius: 10px;
+    margin: 0 auto 20px auto;
+}
+
+/* Custom Glassmorphism effect for map overlay buttons */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
