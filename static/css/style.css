@@ -1,6 +1,11 @@
 /* =========================================
-   SEWANEE TRANSIT - CUSTOM STYLES
+   SEWANEE TRANSIT — CUSTOM STYLES
    static/css/style.css
+   
+   NOTE: Most styling is done in Tailwind classes
+   directly in the HTML. This file only adds things
+   Tailwind can't do: animations, custom scrollbars,
+   and complex pseudo-element tricks.
 ========================================= */
 
 /* --- 1. Sewanee Brand Variables --- */
@@ -8,71 +13,96 @@
     --sewanee-purple: #582C83;
     --sewanee-gold: #C8A051;
     --dark-container: #1C1C1E;
-    --app-bg: #F9FAFB;
+    --app-bg: #F4F1F8;
 }
 
-/* --- 2. Smooth Scrolling & Base --- */
+/* --- 2. Base --- */
 html {
     scroll-behavior: smooth;
 }
 
 body {
+    background-color: var(--app-bg);
+    font-family: 'DM Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- 3. Hide Scrollbars (For the horizontal scrolling tags) --- */
-/* This hides the ugly scrollbar but still lets you swipe/scroll */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+/* --- 3. Monospace number font --- */
+/* Applied via font-mono class in Tailwind,
+   which maps to ui-monospace, SFMono-Regular etc.
+   We keep this here in case you want to swap fonts. */
+.font-mono-nums {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 
-/* --- 4. Live Map Animations (For view.html) --- */
-/* The pulsing gold ring around the live bus icon */
+/* --- 4. Hide Scrollbars (horizontal tag scrolling) --- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* --- 5. Live Map Animations --- */
+/* Pulsing ring behind the bus icon on view.html */
 .pulse-ring {
     position: absolute;
-    width: 60px;
-    height: 60px;
-    background-color: rgba(200, 160, 81, 0.5); /* Sewanee Gold with transparency */
+    width: 64px;
+    height: 64px;
+    background-color: rgba(200, 160, 81, 0.4);
     border-radius: 50%;
     animation: pulse-anim 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
     z-index: 10;
-    /* Centers it perfectly behind a 48px bus icon */
     top: 50%;
     left: 50%;
-    margin-top: -30px; 
-    margin-left: -30px;
+    transform: translate(-50%, -50%);
 }
 
 @keyframes pulse-anim {
-    0% {
-        transform: scale(0.8);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1.8);
-        opacity: 0;
-    }
+    0%   { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2.0); opacity: 0; }
 }
 
-/* --- 5. UI Elements --- */
-/* The little grey pill at the top of the map bottom-sheet */
+/* --- 6. Glassmorphism Utility --- */
+/* Used for map overlay buttons and the bottom info bar */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* --- 7. Card Hover Lift --- */
+/* Applied to any card that should lift on hover.
+   Tailwind does this with hover:-translate-y-1 hover:shadow-xl,
+   but this class is a convenient shorthand if needed. */
+.card-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(88, 44, 131, 0.12);
+}
+
+/* --- 8. Drag Handle (mobile bottom sheet) --- */
 .drag-handle {
     width: 48px;
-    height: 6px;
+    height: 5px;
     background-color: #D1D5DB;
     border-radius: 10px;
     margin: 0 auto 20px auto;
 }
 
-/* Custom Glassmorphism effect for map overlay buttons */
-.glass-btn {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+/* --- 9. Active nav link indicator --- */
+/* Add .nav-active class via JS or Jinja to the current page's link */
+.nav-active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+}
+
+/* --- 10. Table row hover (subtle purple tint) --- */
+tbody tr:hover {
+    background-color: rgba(88, 44, 131, 0.03);
 }

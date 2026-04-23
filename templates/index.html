@@ -2,89 +2,232 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    
-    <!-- Welcome Section -->
-    <div class="mb-10">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome to the Domain.</h1>
-        <p class="text-lg text-gray-500">Track shuttles, view schedules, and get across campus.</p>
+
+    <!-- ====================================
+         HERO / WELCOME SECTION
+         - Bold headline
+         - Live status pill
+         - Quick time summary
+    ==================================== -->
+    <div class="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+            <!-- 
+                Tailwind note: text-4xl = font-size 2.25rem
+                font-bold = font-weight 700
+                text-gray-900 = near-black text color
+                mb-2 = margin-bottom 8px (2 * 4px scale)
+            -->
+            <h1 class="text-4xl font-bold text-gray-900 leading-tight">
+                Welcome to<br class="hidden sm:block"> the Mountain.
+            </h1>
+            <p class="text-gray-500 mt-2 text-base">Real-time shuttles for the Sewanee.</p>
+        </div>
+
+        <!-- Live status badge — flex = display flex, items-center = align-items center -->
+        <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-5 py-3 shadow-sm self-start sm:self-auto">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+            <div>
+                <p class="text-xs text-gray-400 font-medium uppercase tracking-widest">System Status</p>
+                <p class="text-sm font-bold text-gray-900">All Routes Operating</p>
+            </div>
+        </div>
     </div>
 
-    <!-- Quick Access Desktop Grid -->
+    <!-- ====================================
+         QUICK ACCESS CARDS
+         Tailwind responsive grid:
+           grid-cols-1       → 1 column (mobile)
+           md:grid-cols-2    → 2 columns (≥768px)
+           lg:grid-cols-4    → 4 columns (≥1024px)
+         gap-5 → 20px gap between cards
+    ==================================== -->
     <section class="mb-12">
-        <h2 class="text-xl font-semibold text-black mb-6">Quick Access</h2>
-        
-        <!-- Responsive Grid: 1 col on mobile, 2 on tablet, 4 on desktop -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <a href="{{ url_for('view_map') }}" class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
-                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">📍</div>
-                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Live Map Tracker</span>
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Quick Access</h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <!-- Card 1: Live Map -->
+            <!-- 
+                group = lets child elements react to parent hover with group-hover:
+                hover:-translate-y-1 = moves up 4px on hover
+                transition-all duration-300 = smooth 300ms animation on ALL properties
+            -->
+            <a href="{{ url_for('view_map') }}"
+               class="bg-[#582C83] rounded-2xl p-5 h-36 flex flex-col justify-between group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <span class="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center text-xl">📍</span>
+                <div>
+                    <p class="text-white font-semibold text-base leading-tight group-hover:text-[#C8A051] transition-colors">Live Map</p>
+                    <p class="text-white/50 text-xs mt-0.5">Track shuttles now</p>
+                </div>
             </a>
-            
-            <div class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">⏰</div>
-                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Shuttle Schedule</span>
+
+            <!-- Card 2: Schedule -->
+            <a href = "{{ url_for('schedule') }}">
+                <div class="bg-[#1C1C1E] rounded-2xl p-5 h-36 flex flex-col justify-between group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                    <span class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">⏰</span>
+                    <div>
+                        <p class="text-white font-semibold text-base leading-tight group-hover:text-[#C8A051] transition-colors">Schedule</p>
+                        <p class="text-white/50 text-xs mt-0.5">View all routes</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Card 3: Report Issue -->
+            <div class="bg-[#1C1C1E] rounded-2xl p-5 h-36 flex flex-col justify-between group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <span class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">⚠️</span>
+                <div>
+                    <p class="text-white font-semibold text-base leading-tight group-hover:text-[#C8A051] transition-colors">Report Issue</p>
+                    <p class="text-white/50 text-xs mt-0.5">Flag a problem</p>
+                </div>
             </div>
 
-            <div class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">⚠️</div>
-                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Report Issue</span>
-            </div>
-
-            <div class="bg-[#1C1C1E] rounded-3xl p-6 h-40 flex flex-col justify-end relative overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="absolute top-6 right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-xl">📞</div>
-                <span class="text-white font-medium text-lg w-2/3 leading-tight group-hover:text-[#C8A051] transition-colors">Contact SPO</span>
+            <!-- Card 4: Contact SPO -->
+            <div class="bg-[#C8A051] rounded-2xl p-5 h-36 flex flex-col justify-between group hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <span class="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center text-xl">📞</span>
+                <div>
+                    <p class="text-white font-semibold text-base leading-tight group-hover:text-white/80 transition-colors">Contact SPO</p>
+                    <p class="text-white/70 text-xs mt-0.5">Get help fast</p>
+                </div>
             </div>
 
         </div>
     </section>
 
-    <!-- Two Column Desktop Layout for info -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        
-        <!-- Left Column: Upcoming Stops -->
+    <!-- ====================================
+         MAIN TWO-COLUMN LAYOUT
+         lg:grid-cols-2 → 2 equal columns on large screens
+         grid-cols-1    → stacks to 1 column on mobile
+    ==================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- LEFT: Route Status -->
         <section>
-            <h2 class="text-xl font-semibold text-black mb-6">Route Status</h2>
-            <div class="bg-white border border-gray-200 rounded-[32px] p-8 shadow-sm">
-                <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
-                    <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="font-bold text-gray-900 text-lg">Main Loop Active</span>
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Route Status</h2>
+
+            <!-- White card: rounded-[28px] is a large custom border radius -->
+            <div class="bg-white border border-gray-200 rounded-[28px] overflow-hidden shadow-sm">
+                
+                <!-- Card Header -->
+                <div class="px-6 pt-6 pb-5 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <span class="font-bold text-gray-900">Main Loop</span>
+                    </div>
+                    <!-- 
+                        px-3 py-1 = padding: 4px 12px
+                        rounded-full = fully rounded pill shape
+                        text-xs = font-size 0.75rem
+                    -->
+                    <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wide">On Time</span>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between group">
-                        <div class="flex items-center gap-6">
-                            <div class="w-12 h-12 rounded-full bg-[#582C83] flex items-center justify-center text-white font-bold">01</div>
-                            <span class="text-gray-900 font-semibold text-lg">McClurg Dining</span>
+                <!-- Stop List -->
+                <div class="p-6 space-y-4">
+                    <!-- Stop Item 1 (active/next) -->
+                    <div class="flex items-center justify-between p-3 bg-[#582C83]/5 rounded-xl border border-[#582C83]/10">
+                        <div class="flex items-center gap-4">
+                            <!-- 
+                                w-10 h-10 = width & height 40px
+                                rounded-full = circle
+                                flex items-center justify-center = centers icon inside
+                            -->
+                            <div class="w-10 h-10 rounded-full bg-[#582C83] flex items-center justify-center text-white font-bold text-sm font-mono">01</div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">McClurg Dining Hall</p>
+                                <p class="text-xs text-gray-400">Arriving shortly</p>
+                            </div>
                         </div>
-                        <span class="text-[#582C83] font-bold">3 min</span>
+                        <span class="text-[#582C83] font-black text-lg font-mono">3m</span>
                     </div>
+
+                    <!-- Stop Item 2 (upcoming, dimmed with opacity-60) -->
+                    <div class="flex items-center justify-between p-3 rounded-xl opacity-60">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm font-mono">02</div>
+                            <div>
+                                <p class="font-semibold text-gray-700 text-sm">The SPO / Bookstore</p>
+                                <p class="text-xs text-gray-400">ETA 6 min</p>
+                            </div>
+                        </div>
+                        <span class="text-gray-400 font-bold text-base font-mono">6m</span>
+                    </div>
+
+                    <!-- Stop Item 3 -->
+                    <div class="flex items-center justify-between p-3 rounded-xl opacity-40">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm font-mono">03</div>
+                            <div>
+                                <p class="font-semibold text-gray-700 text-sm">Fowler Center</p>
+                                <p class="text-xs text-gray-400">ETA 10 min</p>
+                            </div>
+                        </div>
+                        <span class="text-gray-400 font-bold text-base font-mono">10m</span>
+                    </div>
+                </div>
+
+                <!-- Card Footer: View Full Route link -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                    <a href="{{ url_for('view_map') }}" class="text-[#582C83] text-sm font-semibold hover:underline">
+                        View live map →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Alerts + Stats -->
+        <section class="flex flex-col gap-6">
+            
+            <!-- System Alerts -->
+            <div>
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">System Alerts</h2>
+                <div class="space-y-3">
                     
-                    <div class="flex items-center justify-between group opacity-60">
-                        <div class="flex items-center gap-6">
-                            <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">02</div>
-                            <span class="text-gray-900 font-semibold text-lg">Fowler Center</span>
+                    <!-- Alert Card: border-l-4 = left accent bar (common alert pattern) -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-start gap-4 shadow-sm border-l-4 border-[#C8A051]">
+                        <span class="text-2xl mt-0.5 flex-shrink-0">🚧</span>
+                        <div>
+                            <p class="font-bold text-gray-900 text-sm">Roadwork on University Ave</p>
+                            <p class="text-gray-500 text-xs mt-0.5 leading-relaxed">Expect slight delays near All Saints' Chapel due to ongoing construction.</p>
                         </div>
-                        <span class="text-gray-500">10 min</span>
                     </div>
+
+                    <!-- Info Alert -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-start gap-4 shadow-sm border-l-4 border-blue-400">
+                        <span class="text-2xl mt-0.5 flex-shrink-0">📢</span>
+                        <div>
+                            <p class="font-bold text-gray-900 text-sm">Weekend Schedule Change</p>
+                            <p class="text-gray-500 text-xs mt-0.5 leading-relaxed">Saturday service starts at 9 AM instead of 8 AM this week.</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </section>
 
-        <!-- Right Column: System Alerts -->
-        <section>
-            <h2 class="text-xl font-semibold text-black mb-6">System Alerts</h2>
-            <div class="bg-gray-100 rounded-[32px] p-8 space-y-4 border border-gray-200">
-                <div class="bg-white p-4 rounded-2xl flex items-start gap-4 shadow-sm border-l-4 border-[#C8A051]">
-                    <div class="text-2xl mt-1">🚧</div>
-                    <div>
-                        <h4 class="font-bold text-gray-900">Roadwork on University Ave</h4>
-                        <p class="text-gray-600 text-sm mt-1">Expect slight delays near All Saints' Chapel due to ongoing construction.</p>
+            <!-- Quick Stats Row -->
+            <div>
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Today at a Glance</h2>
+                <!-- grid-cols-3 = 3 equal columns, gap-3 = 12px gap -->
+                <div class="grid grid-cols-3 gap-3">
+                    
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center shadow-sm">
+                        <p class="text-2xl font-black text-[#582C83] font-mono">2</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-tight">Routes<br>Active</p>
                     </div>
+
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center shadow-sm">
+                        <p class="text-2xl font-black text-[#C8A051] font-mono">94%</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-tight">On-Time<br>Rate</p>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-2xl p-4 text-center shadow-sm">
+                        <p class="text-2xl font-black text-gray-900 font-mono">7</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-tight">Stops<br>Today</p>
+                    </div>
+
                 </div>
             </div>
-        </section>
 
+        </section>
     </div>
+
 </div>
 {% endblock %}

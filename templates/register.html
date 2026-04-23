@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-[#F4F1F8]">
+    
+    <div class="w-full max-w-md">
+        
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 bg-[#C8A051] rounded-2xl flex items-center justify-center text-white font-black text-xl mx-auto mb-4 shadow-lg">ST</div>
+            <h1 class="text-2xl font-bold text-gray-900">Create an account</h1>
+            <p class="text-gray-400 text-sm mt-1">Join Sewanee Transit to track shuttles & get alerts</p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-[28px] p-8 shadow-sm">
+            
+            <form action="/register" method="POST" class="space-y-4">
+
+                <!-- Name row: grid-cols-2 = two fields side by side -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="first_name" class="block text-sm font-semibold text-gray-700 mb-1.5">First name</label>
+                        <input type="text" id="first_name" name="first_name" placeholder="Jane"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-semibold text-gray-700 mb-1.5">Last name</label>
+                        <input type="text" id="last_name" name="last_name" placeholder="Doe"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email address</label>
+                    <input type="email" id="email" name="email" placeholder="you@sewanee.edu"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                </div>
+
+                <!-- Role selector -->
+                <div>
+                    <label for="role" class="block text-sm font-semibold text-gray-700 mb-1.5">I am a...</label>
+                    <!-- 
+                        select = dropdown element
+                        Same focus/border classes as inputs for consistency
+                        bg-white = prevents dark bg on some browsers
+                    -->
+                    <select id="role" name="role"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                        <option value="">Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="driver">Driver</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                </div>
+
+                <!-- Terms checkbox -->
+                <div class="flex items-start gap-2 pt-1">
+                    <input type="checkbox" id="terms" name="terms" class="accent-[#582C83] mt-0.5">
+                    <label for="terms" class="text-xs text-gray-500 leading-relaxed">
+                        I agree to the <a href="#" class="text-[#582C83] font-semibold hover:underline">Terms of Service</a> and 
+                        <a href="#" class="text-[#582C83] font-semibold hover:underline">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-[#582C83] text-white font-bold py-3 rounded-xl hover:bg-[#6d35a0] active:scale-[0.98] transition-all text-sm mt-2">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="text-center text-sm text-gray-400 mt-6">
+                Already have an account? 
+                <a href="/login" class="text-[#582C83] font-bold hover:underline">Sign in</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

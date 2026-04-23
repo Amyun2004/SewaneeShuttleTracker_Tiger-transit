@@ -1,73 +1,188 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- Use flexbox to put sidebar and map side-by-side -->
-<!-- calc(100vh - 64px) ensures it takes up the exact screen height minus the 64px header -->
+<!--
+    TAILWIND NOTE: calc() still works inside Tailwind's style="" attribute.
+    We use style="height: calc(100vh - 64px)" so the map fills the remaining
+    screen height after the 64px header.
+
+    flex-col lg:flex-row = stacks vertically on mobile, side-by-side on desktop
+-->
 <div class="flex flex-col lg:flex-row w-full" style="height: calc(100vh - 64px);">
-    
-    <!-- LEFT SIDEBAR (Info Panel) -->
+
+    <!-- ============================================
+         LEFT SIDEBAR
+         w-96 = 384px fixed width on desktop (shrink-0 prevents it from shrinking)
+         z-20 = sits above map layer (z-index 20)
+    ============================================ -->
     <div class="w-full lg:w-96 bg-white border-r border-gray-200 shadow-xl z-20 flex flex-col h-full shrink-0">
-        
-        <div class="p-6 border-b border-gray-100">
-            <a href="{{ url_for('index') }}" class="inline-block mb-4 text-sm text-gray-500 hover:text-black font-medium">
-                ← Back to Dashboard
+
+        <!-- ---- Sidebar Header ---- -->
+        <div class="p-6 border-b border-gray-100 bg-[#582C83]">
+            <a href="{{ url_for('index') }}" class="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-medium mb-5 transition">
+                ← Dashboard
             </a>
-            <p class="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-1">Next Stop</p>
-            <h2 class="text-3xl font-bold text-gray-900">McClurg Dining</h2>
-            
-            <div class="mt-4 flex items-end justify-between">
+
+            <!-- Next stop info -->
+            <div class="flex items-start justify-between">
                 <div>
-                    <h3 class="text-4xl font-black text-[#582C83]">3 min</h3>
-                    <p class="text-gray-500 text-sm font-medium mt-1">0.4 miles away</p>
+                    <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-1">Next Stop</p>
+                    <h2 class="text-2xl font-bold text-white leading-tight">McClurg Dining</h2>
+                    <p class="text-white/50 text-xs mt-1">0.4 miles away · Main Loop</p>
                 </div>
-                <span class="px-3 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-full uppercase tracking-wide">On Time</span>
+                <!--
+                    This is the ETA badge on the right side of the header.
+                    text-right aligns the content to the right.
+                -->
+                <div class="text-right">
+                    <p class="text-4xl font-black text-[#C8A051] font-mono leading-none">3</p>
+                    <p class="text-white/60 text-xs font-semibold uppercase">min</p>
+                </div>
+            </div>
+
+            <!-- Status bar under the title -->
+            <div class="mt-4 flex items-center gap-3">
+                <span class="px-3 py-1 bg-green-500/20 border border-green-400/30 text-green-300 font-bold text-xs rounded-full uppercase tracking-wide">
+                    ✓ On Time
+                </span>
+                <span class="text-white/50 text-xs">Updated just now</span>
             </div>
         </div>
 
-        <!-- Sidebar Stop List -->
+        <!-- ---- Route Timeline ---- -->
         <div class="p-6 overflow-y-auto flex-grow">
-            <h4 class="font-bold text-gray-900 mb-6">Upcoming Route</h4>
-            
-            <div class="relative border-l-2 border-gray-200 ml-4 space-y-8">
-                <!-- Stop 1 -->
-                <div class="relative pl-6">
-                    <div class="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-[#C8A051] border-4 border-white shadow-sm"></div>
-                    <h5 class="font-bold text-gray-900">McClurg Dining Hall</h5>
-                    <p class="text-sm text-gray-500">Arriving shortly</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Upcoming Route</p>
+
+            <!--
+                This is a "timeline" component.
+                border-l-2 = left vertical line (the timeline track)
+                ml-4 = indents the line 16px from the left
+                space-y-8 = 32px vertical space between each stop
+            -->
+            <div class="relative border-l-2 border-gray-200 ml-5 space-y-8">
+
+                <!-- Stop 1 — ACTIVE (gold dot) -->
+                <div class="relative pl-7">
+                    <!--
+                        absolute = positioned relative to parent
+                        -left-[11px] = pulls it 11px left so it sits ON the border line
+                        The border-4 border-white creates a "halo" effect
+                    -->
+                    <div class="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-[#C8A051] border-4 border-white shadow-md ring-2 ring-[#C8A051]/30"></div>
+                    <div class="bg-[#582C83]/5 border border-[#582C83]/10 rounded-xl p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">McClurg Dining Hall</p>
+                                <p class="text-xs text-[#582C83] font-semibold mt-0.5">Arriving shortly</p>
+                            </div>
+                            <span class="text-[#582C83] font-black font-mono text-sm">3m</span>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <!-- Stop 2 -->
-                <div class="relative pl-6">
+                <div class="relative pl-7 opacity-70">
                     <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
-                    <h5 class="font-semibold text-gray-600">The SPO / Bookstore</h5>
-                    <p class="text-sm text-gray-400">ETA: 6 mins</p>
+                    <div class="rounded-xl p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-700 text-sm">The SPO / Bookstore</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Main route stop</p>
+                            </div>
+                            <span class="text-gray-400 font-bold font-mono text-sm">6m</span>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <!-- Stop 3 -->
-                <div class="relative pl-6">
-                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
-                    <h5 class="font-semibold text-gray-600">Fowler Center</h5>
-                    <p class="text-sm text-gray-400">ETA: 10 mins</p>
+                <div class="relative pl-7 opacity-50">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-200 border-2 border-white"></div>
+                    <div class="rounded-xl p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-600 text-sm">Fowler Center</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Recreation</p>
+                            </div>
+                            <span class="text-gray-400 font-bold font-mono text-sm">10m</span>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Stop 4 -->
+                <div class="relative pl-7 opacity-40">
+                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-200 border-2 border-white"></div>
+                    <div class="rounded-xl p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-600 text-sm">All Saints' Chapel</p>
+                                <p class="text-xs text-gray-400 mt-0.5">University Ave</p>
+                            </div>
+                            <span class="text-gray-400 font-bold font-mono text-sm">15m</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
+
+        <!-- ---- Sidebar Footer Actions ---- -->
+        <div class="p-4 border-t border-gray-100 bg-gray-50 grid grid-cols-2 gap-3">
+            <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#582C83] text-white text-sm font-semibold hover:bg-[#6d35a0] transition">
+                🔔 Notify Me
+            </button>
+            <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition">
+                ⚠️ Report
+            </button>
+        </div>
+
     </div>
 
-    <!-- RIGHT SIDE (The Map) -->
-    <div class="relative flex-grow bg-gray-200 h-full" style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;">
-        
-        <!-- Dark Overlay just to make the pin pop out -->
-        <div class="absolute inset-0 bg-[#582C83]/10"></div>
+    <!-- ============================================
+         RIGHT SIDE — MAP AREA
+         flex-grow = takes all remaining horizontal space
+         relative = anchor point for absolute children
+    ============================================ -->
+    <div class="relative flex-grow bg-gray-200 h-full"
+         style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1920&q=80');
+                background-size: cover;
+                background-position: center;">
 
-        <!-- Fake Live Bus Marker (with your CSS pulse) -->
-        <div class="absolute top-[50%] left-[50%] z-20">
+        <!-- Overlay tint -->
+        <div class="absolute inset-0 bg-[#582C83]/20"></div>
+
+        <!-- Live Bus Marker — centered on map -->
+        <!--
+            top-[45%] left-[55%] = positions roughly center of the map
+            -translate-x-1/2 -translate-y-1/2 = offsets by half the element's own size
+            so the center of the icon lands exactly on (45%, 55%)
+        -->
+        <div class="absolute top-[45%] left-[55%] -translate-x-1/2 -translate-y-1/2 z-20">
             <div class="pulse-ring"></div>
-            <div class="absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white border-4 border-[#582C83] rounded-full flex items-center justify-center shadow-2xl z-20 text-2xl">
+            <div class="w-14 h-14 bg-white border-4 border-[#582C83] rounded-full flex items-center justify-center shadow-2xl text-2xl relative z-20">
                 🚌
             </div>
         </div>
-        
-    </div>
 
+        <!-- Top-right map controls (glass effect) -->
+        <div class="absolute top-4 right-4 flex flex-col gap-2 z-30">
+            <button class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white transition shadow-md">+</button>
+            <button class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white transition shadow-md">−</button>
+            <div class="w-full h-px bg-white/30 my-1"></div>
+            <button class="glass-btn w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 hover:bg-white transition shadow-md text-sm">🎯</button>
+        </div>
+
+        <!-- Bottom map info bar -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
+            <div class="glass-btn rounded-2xl px-5 py-3 flex items-center gap-4 shadow-lg">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-xs font-semibold text-gray-700">Main Loop Active</span>
+                </div>
+                <div class="w-px h-4 bg-gray-200"></div>
+                <span class="text-xs text-gray-500 font-mono">Last update: just now</span>
+            </div>
+        </div>
+
+    </div>
 </div>
 {% endblock %}

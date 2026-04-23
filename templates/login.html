@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!--
+    min-h-[calc(100vh-64px)] = fills remaining screen height
+    flex items-center justify-center = centers the card both vertically and horizontally
+    px-4 = prevents the card from touching the screen edges on mobile
+-->
+<div class="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-[#F4F1F8]">
+    
+    <div class="w-full max-w-md">
+        
+        <!-- Logo / Brand Header -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 bg-[#582C83] rounded-2xl flex items-center justify-center text-white font-black text-xl mx-auto mb-4 shadow-lg">ST</div>
+            <h1 class="text-2xl font-bold text-gray-900">Welcome back</h1>
+            <p class="text-gray-400 text-sm mt-1">Sign in to your Sewanee Transit account</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white border border-gray-200 rounded-[28px] p-8 shadow-sm">
+            
+            <!-- 
+                Using a <div> for the form wrapper + real form tag inside.
+                action="/login" method="POST" = sends form data to Flask route.
+            -->
+            <form action="/login" method="POST" class="space-y-5">
+
+                <!-- Email Field -->
+                <div>
+                    <!-- for= links the label to the input (accessibility) -->
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                        Email address
+                    </label>
+                    <!-- 
+                        w-full = 100% width
+                        border border-gray-200 = subtle border
+                        rounded-xl = 12px border radius
+                        px-4 py-2.5 = horizontal & vertical padding
+                        focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 = custom focus ring
+                    -->
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        placeholder="you@sewanee.edu"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition"
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+                        <a href="#" class="text-xs text-[#582C83] font-semibold hover:underline">Forgot password?</a>
+                    </div>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        placeholder="••••••••"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition"
+                    >
+                </div>
+
+                <!-- Remember me checkbox -->
+                <div class="flex items-center gap-2">
+                    <!-- 
+                        accent-[#582C83] = colors the checkbox in Sewanee purple
+                        This is a modern Tailwind feature that styles native form controls
+                    -->
+                    <input type="checkbox" id="remember" name="remember" class="accent-[#582C83]">
+                    <label for="remember" class="text-sm text-gray-500">Keep me signed in</label>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-[#582C83] text-white font-bold py-3 rounded-xl hover:bg-[#6d35a0] active:scale-[0.98] transition-all text-sm"
+                >
+                    Sign In
+                </button>
+
+            </form>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-4 my-6">
+                <div class="flex-grow h-px bg-gray-100"></div>
+                <span class="text-xs text-gray-400">or</span>
+                <div class="flex-grow h-px bg-gray-100"></div>
+            </div>
+
+            <!-- Register link -->
+            <p class="text-center text-sm text-gray-400">
+                Don't have an account? 
+                <a href="/register" class="text-[#582C83] font-bold hover:underline">Create one</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
