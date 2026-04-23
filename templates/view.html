@@ -5,7 +5,7 @@
 <!-- Leaflet CSS — the free open-source map library -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<div class="flex flex-col lg:flex-row w-full" style="height: calc(100vh - 64px);">
+<div class="flex flex-col lg:flex-row w-full" style="min-height: calc(100vh - 64px);">
 
     <!-- LEFT SIDEBAR -->
     <div class="w-full lg:w-96 bg-white border-r border-gray-200 shadow-xl z-20 flex flex-col h-full shrink-0">
@@ -101,7 +101,7 @@
         id="map" is what Leaflet targets to inject the map into.
         The div just needs a defined height — flex-grow handles that here.
     -->
-    <div id="map" class="flex-grow h-full z-10"></div>
+    <div id="map" class="flex-grow z-10" style="min-height: 60vh;"></div>
 
 </div>
 
