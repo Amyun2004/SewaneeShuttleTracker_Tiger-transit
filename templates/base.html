@@ -21,40 +21,17 @@
                 </span>
             </a>
 
-            <!-- Nav Links -->
+            <!-- Desktop nav (hidden on mobile) -->
             <nav class="hidden md:flex items-center gap-1">
                 {% if current_user and current_user.active_role == 'driver' %}
-                    {# DRIVER navbar — focused on the drive workflow #}
-                    <a href="{{ url_for('track') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        Drive
-                    </a>
-                    <a href="{{ url_for('history') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        History
-                    </a>
-                    <a href="{{ url_for('schedule') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        Schedule
-                    </a>
+                    <a href="{{ url_for('track') }}"     class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">Drive</a>
+                    <a href="{{ url_for('history') }}"   class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">History</a>
+                    <a href="{{ url_for('schedule') }}"  class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">Schedule</a>
                 {% else %}
-                    {# STUDENT/STAFF/ADMIN/SIGNED-OUT navbar — rider workflow #}
-                    <a href="{{ url_for('index') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        Home
-                    </a>
-                    <a href="{{ url_for('view_map') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        Live Map
-                    </a>
-                    <a href="{{ url_for('schedule') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        Schedule
-                    </a>
-                    <a href="{{ url_for('history') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                        History
-                    </a>
+                    <a href="{{ url_for('index') }}"     class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">Home</a>
+                    <a href="{{ url_for('view_map') }}"  class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">Live Map</a>
+                    <a href="{{ url_for('schedule') }}"  class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">Schedule</a>
+                    <a href="{{ url_for('history') }}"   class="px-4 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all">History</a>
                 {% endif %}
             </nav>
 
@@ -62,7 +39,7 @@
             <div class="flex items-center gap-2">
                 {% if current_user %}
 
-                    <!-- Active-role badge -->
+                    <!-- Active-role badge: hidden on mobile to save space -->
                     <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
                         {% if current_user.active_role == 'driver' %}bg-[#C8A051]/20 text-[#C8A051]
                         {% elif current_user.active_role == 'admin' %}bg-red-500/20 text-red-300
@@ -73,11 +50,8 @@
                         {{ current_user.active_role }}
                     </span>
 
-                    <!--
-                        User menu — uses native <details>/<summary> for a
-                        zero-JS dropdown that's fully accessible.
-                    -->
-                    <details class="relative user-menu">
+                    <!-- User menu (desktop only — hidden on mobile, replaced by hamburger panel) -->
+                    <details class="relative user-menu hidden md:block">
                         <summary class="cursor-pointer rounded-lg hover:bg-white/10 transition">
                             <span class="flex items-center gap-2 px-2 py-1">
                                 <span class="hidden md:inline text-white/90 text-sm font-medium">
@@ -88,16 +62,11 @@
                                 </span>
                             </span>
                         </summary>
-
                         <div>
-
-                            <!-- Profile header -->
                             <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
                                 <p class="text-sm font-bold text-gray-900 truncate">{{ current_user.name }}</p>
                                 <p class="text-xs text-gray-400 truncate">@{{ current_user.username }}</p>
                             </div>
-
-                            <!-- Mode switcher (only if user has multiple roles) -->
                             {% if current_user.all_roles|length > 1 %}
                                 <div class="px-4 py-2 border-b border-gray-100">
                                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Switch Mode</p>
@@ -126,8 +95,6 @@
                                     </div>
                                 </div>
                             {% endif %}
-
-                            <!-- Actions -->
                             <a href="{{ url_for('logout') }}"
                                class="block px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition">
                                 Sign out
@@ -136,13 +103,84 @@
                     </details>
 
                 {% else %}
-                    <a href="{{ url_for('login') }}"
-                       class="px-3 py-1.5 text-sm font-medium text-white/80 hover:text-white transition">Sign in</a>
-                    <a href="{{ url_for('register') }}"
-                       class="px-3 py-1.5 bg-[#C8A051] hover:opacity-90 rounded-lg text-sm font-bold text-white transition">
-                        Sign up
-                    </a>
+                    <a href="{{ url_for('login') }}"    class="hidden md:inline-block px-3 py-1.5 text-sm font-medium text-white/80 hover:text-white transition">Sign in</a>
+                    <a href="{{ url_for('register') }}" class="hidden md:inline-block px-3 py-1.5 bg-[#C8A051] hover:opacity-90 rounded-lg text-sm font-bold text-white transition">Sign up</a>
                 {% endif %}
+
+                <!-- Hamburger button — mobile only -->
+                <button type="button"
+                        onclick="toggleMobileMenu()"
+                        aria-label="Open menu"
+                        class="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-white">
+                    <svg id="hamburgerIcon"   width="22" height="22" viewBox="0 0 22 22" fill="none">
+                        <path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <svg id="hamburgerClose"  width="22" height="22" viewBox="0 0 22 22" fill="none" class="hidden">
+                        <path d="M5 5l12 12M17 5L5 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- =====================================
+             MOBILE MENU PANEL — slides down from header
+             Hidden by default; toggled via JS
+             ===================================== -->
+        <div id="mobileMenu" class="md:hidden hidden bg-[#582C83] border-t border-white/10 shadow-xl">
+            <div class="px-4 py-4 space-y-1">
+
+                <!-- Nav links -->
+                {% if current_user and current_user.active_role == 'driver' %}
+                    <a href="{{ url_for('track') }}"     class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">🚐 Drive</a>
+                    <a href="{{ url_for('history') }}"   class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">📊 History</a>
+                    <a href="{{ url_for('schedule') }}"  class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">⏰ Schedule</a>
+                {% else %}
+                    <a href="{{ url_for('index') }}"     class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">🏠 Home</a>
+                    <a href="{{ url_for('view_map') }}"  class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">📍 Live Map</a>
+                    <a href="{{ url_for('schedule') }}"  class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">⏰ Schedule</a>
+                    <a href="{{ url_for('history') }}"   class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">📊 History</a>
+                {% endif %}
+
+                <!-- User section -->
+                <div class="pt-3 mt-3 border-t border-white/10">
+                    {% if current_user %}
+                        <div class="px-4 py-2">
+                            <p class="text-xs text-white/50 uppercase tracking-wider font-bold">Signed in as</p>
+                            <p class="text-white font-bold text-sm mt-0.5">{{ current_user.name }}</p>
+                            <p class="text-white/50 text-xs">@{{ current_user.username }} · {{ current_user.active_role }}</p>
+                        </div>
+
+                        {% if current_user.all_roles|length > 1 %}
+                            <div class="px-4 py-2">
+                                <p class="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-2">Switch Mode</p>
+                                {% for r in ['rider', 'driver', 'admin'] %}
+                                    {% if r in current_user.all_roles and r != current_user.active_role %}
+                                        <a href="{{ url_for('switch_mode', new_role=r) }}"
+                                           class="block px-3 py-2 rounded-lg text-white/90 text-sm font-medium hover:bg-white/10 transition">
+                                            {% if r == 'driver' %}🚐{% elif r == 'admin' %}⚙️{% else %}👤{% endif %}
+                                            Switch to {{ r }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <a href="{{ url_for('logout') }}"
+                           class="block px-4 py-3 mt-2 rounded-xl text-red-300 font-semibold text-base hover:bg-red-500/10 transition">
+                            Sign out
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}"
+                           class="block px-4 py-3 rounded-xl text-white font-semibold text-base hover:bg-white/10 transition">
+                            Sign in
+                        </a>
+                        <a href="{{ url_for('register') }}"
+                           class="block px-4 py-3 mt-2 rounded-xl bg-[#C8A051] text-white font-bold text-center text-base hover:opacity-90 transition">
+                            Create account
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
@@ -163,6 +201,25 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const open = document.getElementById('hamburgerIcon');
+            const close = document.getElementById('hamburgerClose');
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                open.classList.add('hidden');
+                close.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+                open.classList.remove('hidden');
+                close.classList.add('hidden');
+            }
+        }
+    </script>
 
 </body>
 </html>
