@@ -1,99 +1,109 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!--
-    min-h-[calc(100vh-64px)] = fills remaining screen height
-    flex items-center justify-center = centers the card both vertically and horizontally
-    px-4 = prevents the card from touching the screen edges on mobile
--->
 <div class="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-[#F4F1F8]">
-    
+
     <div class="w-full max-w-md">
-        
-        <!-- Logo / Brand Header -->
+
         <div class="text-center mb-8">
             <div class="w-14 h-14 bg-[#582C83] rounded-2xl flex items-center justify-center text-white font-black text-xl mx-auto mb-4 shadow-lg">ST</div>
             <h1 class="text-2xl font-bold text-gray-900">Welcome back</h1>
             <p class="text-gray-400 text-sm mt-1">Sign in to your Sewanee Transit account</p>
         </div>
 
-        <!-- Login Card -->
-        <div class="bg-white border border-gray-200 rounded-[28px] p-8 shadow-sm">
-            
-            <!-- 
-                Using a <div> for the form wrapper + real form tag inside.
-                action="/login" method="POST" = sends form data to Flask route.
-            -->
-            <form action="/login" method="POST" class="space-y-5">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4 space-y-2">
+                {% for category, msg in messages %}
+                    <div class="rounded-xl px-4 py-3 text-sm font-medium
+                        {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200
+                        {% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-                <!-- Email Field -->
+        <div class="bg-white border border-gray-200 rounded-[28px] p-8 shadow-sm">
+
+            <!-- Mode Toggle -->
+            <!--
+                Two-button segmented control. The selected button writes its
+                value into a hidden form field below, and also reloads the page
+                with ?mode=... so the toggle state survives validation errors.
+            -->
+            <div class="mb-6">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Sign in as</p>
+                <div class="flex rounded-xl border border-gray-200 bg-gray-50 p-1">
+                    <a href="{{ url_for('login', mode='rider') }}"
+                       class="flex-1 py-2.5 text-center rounded-lg text-sm font-semibold transition-all
+                              {% if mode == 'rider' %}bg-[#582C83] text-white shadow-sm
+                              {% else %}text-gray-500 hover:text-gray-800{% endif %}">
+                        Student / Staff
+                    </a>
+                    <a href="{{ url_for('login', mode='staff') }}"
+                       class="flex-1 py-2.5 text-center rounded-lg text-sm font-semibold transition-all
+                              {% if mode == 'staff' %}bg-[#C8A051] text-white shadow-sm
+                              {% else %}text-gray-500 hover:text-gray-800{% endif %}">
+                        Driver / Admin
+                    </a>
+                </div>
+                <p class="text-xs text-gray-400 mt-2 leading-relaxed">
+                    {% if mode == 'staff' %}
+                        For shuttle drivers and transit administrators.
+                    {% else %}
+                        For students and faculty riding the shuttle.
+                    {% endif %}
+                </p>
+            </div>
+
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-5">
+
+                <!-- Hidden field carries the chosen mode to the POST handler -->
+                <input type="hidden" name="mode" value="{{ mode }}">
+
                 <div>
-                    <!-- for= links the label to the input (accessibility) -->
-                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">
-                        Email address
-                    </label>
-                    <!-- 
-                        w-full = 100% width
-                        border border-gray-200 = subtle border
-                        rounded-xl = 12px border radius
-                        px-4 py-2.5 = horizontal & vertical padding
-                        focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 = custom focus ring
-                    -->
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email"
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email address</label>
+                    <input type="email" id="email" name="email" required
                         placeholder="you@sewanee.edu"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition"
-                    >
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
                 </div>
 
-                <!-- Password Field -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
                         <a href="#" class="text-xs text-[#582C83] font-semibold hover:underline">Forgot password?</a>
                     </div>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password"
+                    <input type="password" id="password" name="password" required
                         placeholder="••••••••"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition"
-                    >
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
                 </div>
 
-                <!-- Remember me checkbox -->
                 <div class="flex items-center gap-2">
-                    <!-- 
-                        accent-[#582C83] = colors the checkbox in Sewanee purple
-                        This is a modern Tailwind feature that styles native form controls
-                    -->
                     <input type="checkbox" id="remember" name="remember" class="accent-[#582C83]">
                     <label for="remember" class="text-sm text-gray-500">Keep me signed in</label>
                 </div>
 
-                <!-- Submit Button -->
-                <button 
-                    type="submit"
-                    class="w-full bg-[#582C83] text-white font-bold py-3 rounded-xl hover:bg-[#6d35a0] active:scale-[0.98] transition-all text-sm"
-                >
-                    Sign In
+                <button type="submit"
+                    class="w-full font-bold py-3 rounded-xl active:scale-[0.98] transition-all text-sm text-white
+                           {% if mode == 'staff' %}bg-[#C8A051] hover:opacity-90
+                           {% else %}bg-[#582C83] hover:bg-[#6d35a0]{% endif %}">
+                    Sign In{% if mode == 'staff' %} as Driver / Admin{% endif %}
                 </button>
 
             </form>
 
-            <!-- Divider -->
             <div class="flex items-center gap-4 my-6">
                 <div class="flex-grow h-px bg-gray-100"></div>
                 <span class="text-xs text-gray-400">or</span>
                 <div class="flex-grow h-px bg-gray-100"></div>
             </div>
 
-            <!-- Register link -->
             <p class="text-center text-sm text-gray-400">
-                Don't have an account? 
-                <a href="/register" class="text-[#582C83] font-bold hover:underline">Create one</a>
+                Don't have an account?
+                <a href="{{ url_for('register') }}" class="text-[#582C83] font-bold hover:underline">Create one</a>
             </p>
 
         </div>

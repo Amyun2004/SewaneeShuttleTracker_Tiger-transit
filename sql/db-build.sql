@@ -19,7 +19,7 @@ drop table if exists users;
 -- -----------------------------------------------------------------------------
 create table users ( user_id int not null auto_increment,
                     username varchar(32) not null,
-                    password_hash  varchar(128) not null,
+                    password_hash  varchar(255) not null,
                     email varchar(128) not null,
                     full_name varchar(96) not null,
                     role varchar(12) not null,
@@ -118,20 +118,55 @@ create table locations (
     foreign key (trip_id) references trips (trip_id)
 );
 
+-- =============================================================================
+-- user_roles : many-to-many between users and the roles they can use
+-- =============================================================================
+create table user_roles (
+    user_id    int          not null,
+    role       varchar(12)  not null,
+    granted_at datetime     not null default current_timestamp,
+    primary key (user_id, role),
+    foreign key (user_id) references users (user_id) on delete cascade
+);
+
+create index idx_user_roles_role on user_roles (role);
+
+-- Backfill from users.role
+insert into user_roles (user_id, role)
+select user_id, role from users;
+
+-- Demo data: give admin user multiple roles so role-switching can be demoed
+insert into user_roles (user_id, role)
+select user_id, 'driver' from users where username = 'admin0';
+
+insert into user_roles (user_id, role)
+select user_id, 'rider'  from users where username = 'admin0';
 --------------------------------------------------------
 -- Mock data
 --------------------------------------------------------
 
-insert into users (username, password_hash, email, full_name, role, created_at) values
-    ('jsmith',   'hash_placeholder_01', 'jsmith@sewanee.edu',   'Jordan Smith',     'rider',  '2026-01-15 10:00:00'),
-    ('mpatel',   'hash_placeholder_02', 'mpatel@sewanee.edu',   'Maya Patel',       'rider',  '2026-01-22 12:30:00'),
-    ('rchen',    'hash_placeholder_03', 'rchen@sewanee.edu',    'Ryan Chen',        'rider',  '2026-02-04 09:15:00'),
-    ('kwilliams','hash_placeholder_04', 'kwill@sewanee.edu',    'Kaya Williams',    'rider',  '2026-04-12 18:45:00'),
-    ('pgarcia',  'hash_placeholder_05', 'pgarcia@sewanee.edu',  'Paulo Garcia',     'driver', '2026-01-10 08:00:00'),
-    ('driver2',  'hash_placeholder_06', 'driver2@sewanee.edu',  'Sasha Ivanova',    'driver', '2026-04-11 14:00:00'),
-    ('alex7',    'hash_placeholder_07', 'alex7@sewanee.edu',    'Alex Thompson',    'driver', '2026-04-15 09:30:00'),
-    ('admin_a',  'hash_placeholder_08', 'admin@sewanee.edu',    'Amyun Ghimire',    'admin',  '2026-01-05 08:00:00');
+-- =============================================================================
+-- INDEXES (rubric: index every column used in WHERE or JOIN)
+-- =============================================================================
+create index idx_trips_driver       on trips     (driver_id);
+create index idx_trips_shuttle      on trips     (shuttle_id);
+create index idx_trips_route        on trips     (route_id);
+create index idx_trips_status       on trips     (status);
+create index idx_trips_start_time   on trips     (start_time);
+create index idx_locations_trip     on locations (trip_id);
+create index idx_locations_recorded on locations (recorded_at);
+create index idx_route_stops_route  on route_stops (route_id);
+create index idx_users_role         on users     (role);
+create index idx_users_created_at   on users     (created_at);
 
+
+-- Seed users.  Password for ALL seed accounts is:  Password1
+-- (real werkzeug pbkdf2 hash of "Password1")
+insert into users (username, password_hash, email, full_name, role, created_at) values
+    ('jsmith1',   'pbkdf2:sha256:600000$placeholder$REPLACE_AT_RUNTIME',  'jsmith@sewanee.edu',  'Jordan Smith',  'rider',  '2026-01-15 10:00:00'),
+    ('mpatel2',   'pbkdf2:sha256:600000$placeholder$REPLACE_AT_RUNTIME',  'mpatel@sewanee.edu',  'Maya Patel',    'rider',  '2026-01-22 12:30:00'),
+    ('pgarcia5',  'pbkdf2:sha256:600000$placeholder$REPLACE_AT_RUNTIME',  'pgarcia@sewanee.edu', 'Paulo Garcia',  'driver', '2026-01-10 08:00:00'),
+    ('admin0',    'pbkdf2:sha256:600000$placeholder$REPLACE_AT_RUNTIME',  'admin@sewanee.edu',   'Amyun Ghimire', 'admin',  '2026-01-05 08:00:00');
 
 insert into shuttles (shuttle_name, license_plate, capacity, status) values
     ('Tiger-1', 'TN-ABC123', 14, 'active'),

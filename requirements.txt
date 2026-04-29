@@ -1,1 +1,4 @@
 flask
+mysql-connector-python
+werkzeug
+python-dotenv

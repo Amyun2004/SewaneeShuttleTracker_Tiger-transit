@@ -2,67 +2,103 @@
 
 {% block content %}
 <div class="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-[#F4F1F8]">
-    
+
     <div class="w-full max-w-md">
-        
+
         <div class="text-center mb-8">
             <div class="w-14 h-14 bg-[#C8A051] rounded-2xl flex items-center justify-center text-white font-black text-xl mx-auto mb-4 shadow-lg">ST</div>
             <h1 class="text-2xl font-bold text-gray-900">Create an account</h1>
             <p class="text-gray-400 text-sm mt-1">Join Sewanee Transit to track shuttles & get alerts</p>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-[28px] p-8 shadow-sm">
-            
-            <form action="/register" method="POST" class="space-y-4">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4 space-y-2">
+                {% for category, msg in messages %}
+                    <div class="rounded-xl px-4 py-3 text-sm font-medium
+                        {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200
+                        {% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-                <!-- Name row: grid-cols-2 = two fields side by side -->
+        <div class="bg-white border border-gray-200 rounded-[28px] p-8 shadow-sm">
+
+            <form action="{{ url_for('register') }}" method="POST" class="space-y-4">
+
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-sm font-semibold text-gray-700 mb-1.5">Username</label>
+                    <input type="text" id="username" name="username"
+                        value="{{ form.username if form else '' }}"
+                        placeholder="jdoe1"
+                        pattern="^[A-Za-z][A-Za-z0-9_]{2,30}[0-9]$"
+                        title="Start with a letter, end with a digit, 4–32 chars (letters/digits/underscores)."
+                        required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                    <p class="text-xs text-gray-400 mt-1">Must start with a letter and end with a digit.</p>
+                </div>
+
+                <!-- Name row -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label for="first_name" class="block text-sm font-semibold text-gray-700 mb-1.5">First name</label>
-                        <input type="text" id="first_name" name="first_name" placeholder="Jane"
+                        <input type="text" id="first_name" name="first_name"
+                            value="{{ form.first_name if form else '' }}"
+                            placeholder="Jane" required
                             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
                     </div>
                     <div>
                         <label for="last_name" class="block text-sm font-semibold text-gray-700 mb-1.5">Last name</label>
-                        <input type="text" id="last_name" name="last_name" placeholder="Doe"
+                        <input type="text" id="last_name" name="last_name"
+                            value="{{ form.last_name if form else '' }}"
+                            placeholder="Doe" required
                             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
                     </div>
                 </div>
 
                 <div>
                     <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="you@sewanee.edu"
+                    <input type="email" id="email" name="email"
+                        value="{{ form.email if form else '' }}"
+                        placeholder="you@sewanee.edu" required
                         class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
                 </div>
 
-                <!-- Role selector -->
                 <div>
                     <label for="role" class="block text-sm font-semibold text-gray-700 mb-1.5">I am a...</label>
-                    <!-- 
-                        select = dropdown element
-                        Same focus/border classes as inputs for consistency
-                        bg-white = prevents dark bg on some browsers
-                    -->
-                    <select id="role" name="role"
+                    <select id="role" name="role" required
                         class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
                         <option value="">Select your role</option>
-                        <option value="student">Student</option>
-                        <option value="driver">Driver</option>
-                        <option value="staff">Staff</option>
+                        <option value="student" {% if form and form.role == 'student' %}selected{% endif %}>Student</option>
+                        <option value="staff"   {% if form and form.role == 'staff'   %}selected{% endif %}>Faculty / Staff</option>
+                        <option value="driver"  {% if form and form.role == 'driver'  %}selected{% endif %}>Shuttle Driver</option>
                     </select>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Drivers automatically get a student-mode account too, so you can use the app either way.
+                    </p>
                 </div>
 
                 <div>
                     <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••"
+                    <input type="password" id="password" name="password"
+                        placeholder="••••••••"
+                        pattern="^(?=.*[A-Za-z])(?=.*\d).{8,}$"
+                        title="At least 8 characters, with at least one letter and one digit."
+                        required
                         class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83] transition">
+                    <p class="text-xs text-gray-400 mt-1">8+ characters, with at least one letter and one digit.</p>
                 </div>
 
-                <!-- Terms checkbox -->
+                <!-- Terms checkbox: REQUIRED per assignment rubric -->
                 <div class="flex items-start gap-2 pt-1">
-                    <input type="checkbox" id="terms" name="terms" class="accent-[#582C83] mt-0.5">
+                    <input type="checkbox" id="terms" name="terms" required class="accent-[#582C83] mt-0.5">
                     <label for="terms" class="text-xs text-gray-500 leading-relaxed">
-                        I agree to the <a href="#" class="text-[#582C83] font-semibold hover:underline">Terms of Service</a> and 
+                        I agree to the <a href="#" class="text-[#582C83] font-semibold hover:underline">Terms of Service</a> and
                         <a href="#" class="text-[#582C83] font-semibold hover:underline">Privacy Policy</a>
                     </label>
                 </div>
@@ -75,8 +111,8 @@
             </form>
 
             <p class="text-center text-sm text-gray-400 mt-6">
-                Already have an account? 
-                <a href="/login" class="text-[#582C83] font-bold hover:underline">Sign in</a>
+                Already have an account?
+                <a href="{{ url_for('login') }}" class="text-[#582C83] font-bold hover:underline">Sign in</a>
             </p>
 
         </div>
