@@ -129,6 +129,8 @@ def bearing_deg(lat1, lng1, lat2, lng2):
 # =============================================================================
 @app.route("/")
 def index():
+    if "user_id" not in session:
+        return render_template("landing.html")
     # System status
     status_row = db.query_one("""
         SELECT
