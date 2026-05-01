@@ -784,6 +784,230 @@ def api_create_alert():
     flash("Alert published.", "success")
     return redirect(url_for("index"))
 
+@app.route("/api/stops")
+def api_stops():
+    """All shuttle stops, used by rider map to render markers."""
+    rows = db.query("""
+        SELECT stop_id, stop_name, latitude, longitude, description
+        FROM stops
+        ORDER BY stop_name
+    """)
+    for r in rows:
+        r["latitude"]  = float(r["latitude"])
+        r["longitude"] = float(r["longitude"])
+    return jsonify(rows)
+
+# =============================================================================
+# ADMIN PAGE — runs queries 2, 3, 4, 5 from queries.sql against real data
+# =============================================================================
+@app.route("/admin")
+@role_required("admin")
+def admin_dashboard():
+    # ---- Top stat row: aggregates for the header strip ----
+    stats = db.query_one("""
+        SELECT
+            (SELECT COUNT(*) FROM trips WHERE status='completed'
+                AND start_time >= '2026-01-15')                       AS total_trips,
+            (SELECT COUNT(DISTINCT driver_id) FROM trips
+                WHERE status='completed'
+                AND start_time >= '2026-01-15')                       AS active_drivers,
+            (SELECT COUNT(*) FROM users WHERE role='driver')          AS registered_drivers,
+            (SELECT COUNT(*) FROM incidents WHERE status='open')      AS open_incidents
+    """)
+
+    # ---- On-time rate (last 7 days) — variant of query #4 ----
+    ontime_row = db.query_one("""
+        SELECT COUNT(*) AS total,
+               SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, t.start_time, t.end_time)
+                        <= sched.scheduled_minutes + 5 THEN 1 ELSE 0 END) AS on_time
+        FROM trips t
+        JOIN (SELECT route_id, MAX(expected_min_from_start) AS scheduled_minutes
+              FROM route_stops GROUP BY route_id) sched
+            ON sched.route_id = t.route_id
+        WHERE t.status = 'completed'
+          AND t.start_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    """)
+    if ontime_row and ontime_row["total"]:
+        ontime_rate = round(100 * ontime_row["on_time"] / ontime_row["total"])
+    else:
+        ontime_rate = None
+
+    # ---- QUERY #2: Most active driver this semester ----
+    top_driver = db.query_one("""
+        SELECT u.full_name AS driver,
+               ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.start_time, t.end_time)) / 60.0, 2) AS total_hours,
+               COUNT(*) AS trip_count
+        FROM users u
+        JOIN trips t ON t.driver_id = u.user_id
+        WHERE t.status = 'completed'
+          AND t.start_time >= '2026-01-15'
+        GROUP BY u.user_id, u.full_name
+        ORDER BY total_hours DESC
+        LIMIT 1
+    """)
+
+    # All drivers ranked (for the progress bar context)
+    all_drivers_ranked = db.query("""
+        SELECT u.full_name AS driver,
+               ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.start_time, t.end_time)) / 60.0, 2) AS total_hours
+        FROM users u
+        JOIN trips t ON t.driver_id = u.user_id
+        WHERE t.status = 'completed'
+          AND t.start_time >= '2026-01-15'
+        GROUP BY u.user_id, u.full_name
+        ORDER BY total_hours DESC
+        LIMIT 5
+    """)
+
+    # ---- QUERY #3: Weekend-night popular stops ----
+    weekend_stops = db.query("""
+        SELECT st.stop_name, COUNT(*) AS visits
+        FROM trips t
+        JOIN routes r       ON r.route_id   = t.route_id
+        JOIN route_stops rs ON rs.route_id  = r.route_id
+        JOIN stops st       ON st.stop_id   = rs.stop_id
+        WHERE ((DAYOFWEEK(t.start_time) = 6 AND HOUR(t.start_time) >= 22)
+               OR (DAYOFWEEK(t.start_time) = 7)
+               OR (DAYOFWEEK(t.start_time) = 1 AND HOUR(t.start_time) <  2))
+        GROUP BY st.stop_id, st.stop_name
+        ORDER BY visits DESC, st.stop_name
+        LIMIT 5
+    """)
+
+    # ---- QUERY #4: Schedule vs reality per route ----
+    route_efficiency = db.query("""
+        SELECT r.route_name,
+               actual.avg_actual_minutes,
+               sched.scheduled_minutes,
+               ROUND(actual.avg_actual_minutes - sched.scheduled_minutes, 2) AS minutes_over_schedule
+        FROM routes r
+        LEFT JOIN (
+            SELECT t.route_id,
+                   ROUND(AVG(TIMESTAMPDIFF(MINUTE, t.start_time, t.end_time)), 2) AS avg_actual_minutes
+            FROM trips t
+            WHERE t.status = 'completed'
+            GROUP BY t.route_id
+        ) actual ON actual.route_id = r.route_id
+        LEFT JOIN (
+            SELECT rs.route_id, MAX(rs.expected_min_from_start) AS scheduled_minutes
+            FROM route_stops rs
+            GROUP BY rs.route_id
+        ) sched ON sched.route_id = r.route_id
+        ORDER BY r.route_name
+    """)
+
+    # ---- QUERY #5: New drivers with pattern-matched usernames (last 14 days) ----
+    new_drivers = db.query("""
+        SELECT u.username, u.full_name, u.email, u.created_at,
+               COUNT(t.trip_id) AS trip_count
+        FROM users u
+        LEFT JOIN trips t ON t.driver_id = u.user_id AND t.start_time >= u.created_at
+        WHERE u.role = 'driver'
+          AND u.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+          AND u.username REGEXP '^[A-Za-z].*[0-9]$'
+        GROUP BY u.user_id, u.username, u.full_name, u.email, u.created_at
+        ORDER BY u.created_at DESC
+    """)
+
+    # ---- Recent incidents (open or recent — the inbox) ----
+    incidents = db.query("""
+        SELECT i.incident_id, i.category, i.location, i.description,
+               i.status, i.created_at,
+               u.username AS reporter_username, u.full_name AS reporter_name
+        FROM incidents i
+        JOIN users u ON u.user_id = i.reporter_id
+        ORDER BY
+            FIELD(i.status, 'open', 'reviewing', 'resolved'),
+            i.created_at DESC
+        LIMIT 25
+    """)
+
+    # ---- All alerts (for management section) ----
+    alerts = db.query("""
+        SELECT a.alert_id, a.title, a.body, a.severity,
+               a.created_at, a.expires_at,
+               u.full_name AS author_name,
+               (CASE WHEN a.expires_at IS NULL OR a.expires_at >= NOW() THEN 1 ELSE 0 END) AS is_active
+        FROM alerts a
+        JOIN users u ON u.user_id = a.created_by
+        ORDER BY is_active DESC, a.created_at DESC
+        LIMIT 25
+    """)
+
+    # ---- Recent activity feed (last 5 completed trips) ----
+    recent_trips = db.query("""
+        SELECT t.trip_id, t.start_time, t.end_time,
+               r.route_name,
+               s.shuttle_name,
+               u.full_name AS driver_name,
+               TIMESTAMPDIFF(MINUTE, t.start_time, t.end_time) AS duration_min,
+               sched.scheduled_minutes,
+               CASE
+                   WHEN TIMESTAMPDIFF(MINUTE, t.start_time, t.end_time)
+                        <= sched.scheduled_minutes + 5 THEN 'on_time'
+                   ELSE 'delayed'
+               END AS punctuality
+        FROM trips t
+        JOIN routes r   ON r.route_id   = t.route_id
+        JOIN shuttles s ON s.shuttle_id = t.shuttle_id
+        JOIN users u    ON u.user_id    = t.driver_id
+        LEFT JOIN (SELECT route_id, MAX(expected_min_from_start) AS scheduled_minutes
+                   FROM route_stops GROUP BY route_id) sched
+            ON sched.route_id = t.route_id
+        WHERE t.status = 'completed'
+        ORDER BY t.end_time DESC
+        LIMIT 8
+    """)
+
+    return render_template(
+        "admin.html",
+        stats=stats,
+        ontime_rate=ontime_rate,
+        top_driver=top_driver,
+        all_drivers_ranked=all_drivers_ranked,
+        weekend_stops=weekend_stops,
+        route_efficiency=route_efficiency,
+        new_drivers=new_drivers,
+        incidents=incidents,
+        alerts=alerts,
+        recent_trips=recent_trips,
+    )
+
+
+# =============================================================================
+# ADMIN ACTIONS — incident status updates + alert deletion
+# =============================================================================
+VALID_INCIDENT_STATUSES = {"open", "reviewing", "resolved"}
+
+
+@app.route("/api/incidents/<int:incident_id>/status", methods=["POST"])
+@role_required("admin")
+def api_update_incident_status(incident_id):
+    new_status = (request.form.get("status") or "").strip()
+    if new_status not in VALID_INCIDENT_STATUSES:
+        flash("Invalid status.", "error")
+        return redirect(url_for("admin_dashboard"))
+
+    rows = db.execute(
+        "UPDATE incidents SET status=%s WHERE incident_id=%s",
+        (new_status, incident_id),
+    )
+    if rows == 0:
+        flash("Incident not found.", "error")
+    else:
+        flash(f"Incident #{incident_id} marked {new_status}.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/api/alerts/<int:alert_id>/delete", methods=["POST"])
+@role_required("admin")
+def api_delete_alert(alert_id):
+    rows = db.execute("DELETE FROM alerts WHERE alert_id=%s", (alert_id,))
+    if rows == 0:
+        flash("Alert not found.", "error")
+    else:
+        flash(f"Alert #{alert_id} deleted.", "success")
+    return redirect(url_for("admin_dashboard"))
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

@@ -2,12 +2,14 @@
 
 {% block content %}
 
-<!-- Leaflet CSS — the free open-source map library -->
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <div class="flex flex-col lg:flex-row w-full" style="min-height: calc(100vh - 64px);">
 
-    <!-- LEFT SIDEBAR -->
+    <!-- ======================================================
+         LEFT SIDEBAR — Your location + system info
+         ====================================================== -->
     <div class="w-full lg:w-96 bg-white border-r border-gray-200 shadow-xl z-20 flex flex-col h-full shrink-0">
 
         <div class="p-6 border-b border-gray-100 bg-[#582C83]">
@@ -28,7 +30,6 @@
             </div>
 
             <div class="mt-4 flex items-center gap-3">
-                <!-- GPS status badge — changes color based on signal -->
                 <span id="gpsBadge" class="px-3 py-1 bg-yellow-500/20 border border-yellow-400/30 text-yellow-300 font-bold text-xs rounded-full uppercase tracking-wide">
                     ⌛ Acquiring GPS
                 </span>
@@ -36,51 +37,27 @@
             </div>
         </div>
 
-        <!-- Upcoming Route (static for now, connect to backend later) -->
+        <!-- Live shuttles list (populated by JS) -->
         <div class="p-6 overflow-y-auto flex-grow">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-5">Upcoming Route</p>
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Live Shuttles</p>
+                <span id="shuttleCount" class="text-xs font-bold text-gray-400 font-mono">—</span>
+            </div>
 
-            <div class="relative border-l-2 border-gray-200 ml-5 space-y-8">
+            <div id="liveShuttlesList" class="space-y-3">
+                <p class="text-xs text-gray-400">Checking for shuttles…</p>
+            </div>
 
-                <div class="relative pl-7">
-                    <div class="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-[#C8A051] border-4 border-white shadow-md ring-2 ring-[#C8A051]/30"></div>
-                    <div class="bg-[#582C83]/5 border border-[#582C83]/10 rounded-xl p-3">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-bold text-gray-900 text-sm">McClurg Dining Hall</p>
-                                <p class="text-xs text-[#582C83] font-semibold mt-0.5">Arriving shortly</p>
-                            </div>
-                            <span class="text-[#582C83] font-black font-mono text-sm">3m</span>
-                        </div>
-                    </div>
+            <!-- Empty state -->
+            <div id="noShuttlesState" class="hidden text-center py-8">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span class="text-xl">🚐</span>
                 </div>
-
-                <div class="relative pl-7 opacity-70">
-                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
-                    <div class="rounded-xl p-3">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold text-gray-700 text-sm">The SPO / Bookstore</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Main route stop</p>
-                            </div>
-                            <span class="text-gray-400 font-bold font-mono text-sm">6m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="relative pl-7 opacity-50">
-                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-200 border-2 border-white"></div>
-                    <div class="rounded-xl p-3">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-semibold text-gray-600 text-sm">Fowler Center</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Recreation</p>
-                            </div>
-                            <span class="text-gray-400 font-bold font-mono text-sm">10m</span>
-                        </div>
-                    </div>
-                </div>
-
+                <p class="text-sm font-bold text-gray-700">No shuttles in service</p>
+                <p class="text-xs text-gray-400 mt-1">Check the schedule for upcoming runs.</p>
+                <a href="{{ url_for('schedule') }}" class="inline-block mt-3 text-[#582C83] text-xs font-semibold hover:underline">
+                    View schedule →
+                </a>
             </div>
         </div>
 
@@ -89,24 +66,74 @@
             <button onclick="centerOnMe()" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#582C83] text-white text-sm font-semibold hover:bg-[#6d35a0] transition">
                 🎯 Center Me
             </button>
-            <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition">
-                ⚠️ Report
+            <button onclick="centerOnNearest()" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition">
+                🚐 Show Shuttle
             </button>
         </div>
 
     </div>
 
-    <!-- RIGHT SIDE — REAL MAP -->
-    <!-- 
-        id="map" is what Leaflet targets to inject the map into.
-        The div just needs a defined height — flex-grow handles that here.
-    -->
-    <div id="map" class="flex-grow z-10" style="min-height: 60vh;"></div>
+    <!-- ======================================================
+         RIGHT — MAP + floating Nearest Shuttle bar
+         ====================================================== -->
+    <div class="flex-grow relative">
+        <div id="map" class="w-full h-full z-10" style="min-height: 60vh;"></div>
+
+        <!-- Floating bottom bar — Uber/Lyft style -->
+        <!-- Hidden until we have both a user location AND at least one live shuttle -->
+        <div id="nearestBar" class="hidden absolute left-0 right-0 bottom-0 z-30 px-4 pb-4 pointer-events-none">
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto">
+
+                <!-- Header strip -->
+                <div class="bg-[#582C83] px-5 py-2.5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                        <span class="text-white text-xs font-bold uppercase tracking-wider">Nearest Shuttle</span>
+                    </div>
+                    <span id="nearestUpdate" class="text-white/50 text-[10px] font-mono">—</span>
+                </div>
+
+                <!-- Body -->
+                <div class="px-5 py-4 flex items-center gap-5">
+
+                    <!-- Distance + arrow -->
+                    <div class="flex flex-col items-center shrink-0">
+                        <div class="w-14 h-14 bg-[#C8A051]/10 rounded-full flex items-center justify-center relative">
+                            <!-- The arrow rotates via inline transform -->
+                            <svg id="directionArrow" width="32" height="32" viewBox="0 0 32 32" style="transform: rotate(0deg); transition: transform 0.5s ease;">
+                                <path d="M16 4 L24 24 L16 19 L8 24 Z" fill="#C8A051" stroke="#C8A051" stroke-width="1.5" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <p id="nearestDistance" class="text-2xl font-black text-gray-900 font-mono leading-tight mt-1">—</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">away</p>
+                    </div>
+
+                    <!-- Shuttle info -->
+                    <div class="flex-grow min-w-0">
+                        <p id="nearestShuttle" class="text-base font-bold text-gray-900 truncate">—</p>
+                        <p id="nearestRoute" class="text-xs text-gray-400 truncate">—</p>
+                        <p id="nearestDriver" class="text-xs text-gray-400 truncate mt-0.5">—</p>
+                    </div>
+
+                    <!-- ETAs -->
+                    <div class="flex flex-col items-end shrink-0 text-right">
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Walk</p>
+                            <p id="walkingTime" class="text-sm font-bold text-gray-900 font-mono">—</p>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Shuttle ETA</p>
+                            <p id="shuttleEta" class="text-sm font-bold text-[#582C83] font-mono">—</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script src="{{ url_for('static', filename='js/view.js') }}"></script>
+
 {% endblock %}

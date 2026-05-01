@@ -13,10 +13,6 @@
 
 // ---------- CONFIG ----------
 const PING_INTERVAL_MS  = 5000;      // POST a ping every 5s
-const GEOFENCE_LAT      = 35.2054;   // McClurg approximate centroid
-const GEOFENCE_LNG      = -85.9198;
-const GEOFENCE_RADIUS_M = 150;       // 150m radius
-const MANUAL_GRACE_MS   = 60_000;    // auto-detect won't fire within 60s of manual action
 
 // Sewanee campus center (fallback view if no GPS yet)
 const CAMPUS_CENTER = [35.2034, -85.9210];
@@ -56,15 +52,6 @@ function initMap() {
         .addAttribution('© OpenStreetMap · © CARTO').addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Visualize the geofence so drivers can see where auto-detect activates
-    L.circle([GEOFENCE_LAT, GEOFENCE_LNG], {
-        radius: GEOFENCE_RADIUS_M,
-        color: '#582C83',
-        weight: 1.5,
-        fillColor: '#582C83',
-        fillOpacity: 0.06,
-        dashArray: '6,6'
-    }).addTo(map).bindPopup('<b>Auto-detect zone</b><br>Trips auto-start when you arrive here.');
 
     setTimeout(() => map.invalidateSize(), 200);
 }
@@ -220,20 +207,6 @@ function onPositionUpdate(pos) {
 
     updateDriverMarker(lat, lng);
     setLocationStatus('ok', '✓', `Tracking · ±${lastKnownAccuracy}m`);
-
-    // Auto-detect (deferred to manual actions)
-    if (autoDetectEnabled() && Date.now() - lastManualActionAt > MANUAL_GRACE_MS) {
-        const insideZone = haversineMeters(lat, lng, GEOFENCE_LAT, GEOFENCE_LNG) <= GEOFENCE_RADIUS_M;
-        if (insideZone && !currentTripId) {
-            // Don't actually call start automatically without driver's selected route/shuttle.
-            // Just nudge them.
-            setLocationStatus('hint', '📍', 'Inside zone — pick a route to auto-start');
-        } else if (!insideZone && currentTripId) {
-            // Driver has left the zone with an active trip → auto end
-            console.log('Auto-detect: leaving zone, ending trip');
-            endTrip();
-        }
-    }
 
     // If trip is active, append to trail
     if (currentTripId) {

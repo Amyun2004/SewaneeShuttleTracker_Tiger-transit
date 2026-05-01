@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="flex flex-col lg:flex-row w-full" style="min-height: calc(100vh - 64px);">
+
+    <!-- ======================================================
+         LEFT SIDEBAR — Stats + Filters + Trip List
+         ====================================================== -->
+    <div class="w-full lg:w-[400px] bg-white border-r border-gray-200 shadow-xl z-20 flex flex-col shrink-0">
+
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-100 bg-[#582C83]">
+            <a href="{{ url_for('index') }}" class="inline-flex items-center gap-1.5 text-white/60 hover:text-white text-sm font-medium mb-4 transition">
+                ← Dashboard
+            </a>
+            <h2 class="text-2xl font-bold text-white leading-tight">Shuttle History</h2>
+            <p class="text-white/50 text-xs mt-1" id="historySubtitle">Loading…</p>
+        </div>
+
+        <!-- Stats panel -->
+        <div class="p-6 border-b border-gray-100 grid grid-cols-3 gap-3">
+            <div class="text-center">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Trips</p>
+                <p class="text-2xl font-black text-[#582C83] font-mono mt-1" id="statTrips">—</p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Distance</p>
+                <p class="text-2xl font-black text-[#C8A051] font-mono mt-1" id="statDistance">—</p>
+                <p class="text-[10px] text-gray-400 uppercase">miles</p>
+            </div>
+            <div class="text-center">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Time</p>
+                <p class="text-2xl font-black text-gray-900 font-mono mt-1" id="statTime">—</p>
+                <p class="text-[10px] text-gray-400 uppercase">hrs</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="p-6 border-b border-gray-100 space-y-4">
+
+            <!-- Date range -->
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Time Range</p>
+                <div class="flex rounded-xl border border-gray-200 bg-gray-50 p-1">
+                    <button data-days="1"  class="filter-days flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-gray-500 hover:text-gray-800">24h</button>
+                    <button data-days="7"  class="filter-days flex-1 py-1.5 text-xs font-semibold rounded-lg transition bg-[#582C83] text-white shadow-sm">7d</button>
+                    <button data-days="14" class="filter-days flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-gray-500 hover:text-gray-800">14d</button>
+                    <button data-days="30" class="filter-days flex-1 py-1.5 text-xs font-semibold rounded-lg transition text-gray-500 hover:text-gray-800">30d</button>
+                </div>
+            </div>
+
+            <!-- Route filter -->
+            <div>
+                <label for="routeFilter" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Route</label>
+                <select id="routeFilter"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83]">
+                    <option value="">All routes</option>
+                </select>
+            </div>
+
+            <!-- Shuttle filter -->
+            <div>
+                <label for="shuttleFilter" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Shuttle</label>
+                <select id="shuttleFilter"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#582C83]/30 focus:border-[#582C83]">
+                    <option value="">All shuttles</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Trip list -->
+        <div class="p-6 overflow-y-auto flex-grow">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Trips</p>
+                <span id="tripListCount" class="text-xs font-bold text-gray-400 font-mono">—</span>
+            </div>
+            <div id="tripList" class="space-y-2">
+                <p class="text-xs text-gray-400">Loading trips…</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ======================================================
+         RIGHT — MAP
+         ====================================================== -->
+    <div id="map" class="flex-grow z-10" style="min-height: 60vh;"></div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+
+{% endblock %}

@@ -412,3 +412,39 @@ body:has(.modal-backdrop:not(.hidden)) {
     font-family: 'DM Mono', monospace;
     z-index: 1;
 }
+
+/* =========================================
+   RIDER MAP — floating "Nearest Shuttle" bar
+   ========================================= */
+
+/* On narrow screens, stack the bar contents */
+@media (max-width: 480px) {
+    #nearestBar .px-5.py-4 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    #nearestBar .text-right {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+/* Make sure the bar doesn't cover Leaflet's bottom-right zoom controls */
+.leaflet-bottom.leaflet-right {
+    bottom: 100px !important;   /* push zoom up so it sits above the bar */
+}
+
+@media (max-width: 480px) {
+    .leaflet-bottom.leaflet-right {
+        bottom: 180px !important;  /* even more room when bar is stacked */
+    }
+}
+
+/* =========================================
+   HISTORY PAGE — trip list selection ring
+   ========================================= */
+.trip-list-item.ring-2 {
+    box-shadow: 0 0 0 2px #582C83;
+    border-color: transparent;
+}
