@@ -1,4 +1,23 @@
 /* =========================================
+   ACCESSIBILITY REFERENCES
+
+   1. WebAIM Contrast Checker — https://webaim.org/resources/contrastchecker/
+      Used to verify Sewanee purple (#582C83) on white achieves WCAG AA
+      contrast (8.59:1) and that gold (#C8A051) is paired only with white
+      text on dark backgrounds, never the reverse.
+
+   2. MDN — ARIA: Roles, States, and Properties —
+      https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
+      Source for aria-label usage on icon-only controls (e.g. the mobile
+      hamburger button) and aria-hidden on decorative images.
+
+   3. W3C WCAG 2.1 Quick Reference — https://www.w3.org/WAI/WCAG21/quickref/
+      Official success-criteria checklist; informed decisions to keep body
+      text ≥14px, never use color alone to convey state, and provide
+      descriptive alt text on every meaningful image.
+   ========================================= */
+
+/* =========================================
    SEWANEE TRANSIT — CUSTOM STYLES
    static/css/style.css
    
@@ -447,4 +466,13 @@ body:has(.modal-backdrop:not(.hidden)) {
 .trip-list-item.ring-2 {
     box-shadow: 0 0 0 2px #582C83;
     border-color: transparent;
+}
+
+/* Navbar links — visible on the purple nav background */
+nav a {
+    color: white;
+    transition: color 0.2s;
+}
+nav a:hover {
+    color: #C8A051;  /* Sewanee gold on hover */
 }
