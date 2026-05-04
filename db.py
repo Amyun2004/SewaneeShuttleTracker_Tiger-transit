@@ -1,4 +1,6 @@
 # =========================================
+# Sewanee Transit - CSCI 284, Spring 2026
+# Author: Amyun Ghimire, Anthony Saravia
 # SEWANEE TRANSIT — Database helpers
 # db.py
 #

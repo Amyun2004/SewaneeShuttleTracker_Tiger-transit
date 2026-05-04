@@ -1,3 +1,8 @@
+<!--
+ Sewanee Transit - CSCI 284, Spring 2026
+ Author: Amyun Ghimire, Anthony Saravia
+ -->
+
 {% extends 'base.html' %}
 
 {% block content %}
@@ -98,7 +103,7 @@
         <section>
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Route Status</h2>
-                {% if current_user and current_user.role == 'admin' %}
+                {% if current_user and current_user.active_role == 'admin' %}
                     <button onclick="openAlertModal()"
                         class="text-xs text-[#582C83] font-bold hover:underline">+ New Alert</button>
                 {% endif %}
@@ -176,7 +181,15 @@
 
             <!-- System Alerts -->
             <div>
-                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">System Alerts</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">System Alerts</h2>
+                    {% if current_user and current_user.active_role == 'admin' %}
+                        <button type="button" onclick="openAlertModal()"
+                            class="text-xs font-semibold text-[#582C83] hover:bg-[#582C83]/10 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                            <span class="text-base leading-none">+</span> New Alert
+                        </button>
+                    {% endif %}
+                </div>
                 {% if alerts %}
                     <div class="space-y-3">
                     {% for a in alerts %}
@@ -333,7 +346,7 @@
 </div>
 
 <!-- New Alert Modal (admin only) -->
-{% if current_user and current_user.role == 'admin' %}
+{% if current_user and current_user.active_role == 'admin' %}
 <div id="alertModal" class="modal-backdrop hidden" onclick="if(event.target===this)closeAlertModal()">
     <div class="modal-card">
         <div class="flex items-start justify-between mb-5">

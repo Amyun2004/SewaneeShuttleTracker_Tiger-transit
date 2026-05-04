@@ -8,7 +8,7 @@
 // =========================================
 
 // ---------- CONFIG ----------
-const POLL_INTERVAL_MS = 5000;
+const POLL_INTERVAL_MS = 2000;
 const CAMPUS_CENTER    = [35.2034, -85.9210];
 
 // ---------- MAP SETUP ----------

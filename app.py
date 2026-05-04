@@ -1,10 +1,18 @@
+# =============================================================================
+# Sewanee Transit - CSCI 284, Spring 2026
+# Author: Amyun Ghimire, Anthony Saravia
+# =============================================================================
+
 # =========================================
 # SEWANEE TRANSIT — Flask application
 # app.py
 # =========================================
 
-from dotenv import load_dotenv
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # No dotenv? Fine — read env vars directly.
 
 import os
 import re

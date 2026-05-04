@@ -7,6 +7,9 @@ drop table if exists route_stops;
 drop table if exists stops;
 drop table if exists routes;
 drop table if exists shuttles;
+drop table if exists alerts;
+drop table if exists incidents;
+drop table if exists user_roles;
 drop table if exists users;
 
 -- =============================================================================
@@ -130,6 +133,44 @@ create table user_roles (
 );
 
 create index idx_user_roles_role on user_roles (role);
+
+-- -----------------------------------------------------------------------------
+-- alerts : admin-published banners shown on the homepage
+--   created_by → users.user_id (so we can show "By Amyun Ghimire")
+--   expires_at NULL means "never expires"
+-- -----------------------------------------------------------------------------
+create table alerts (
+    alert_id   int          not null auto_increment,
+    title      varchar(120) not null,
+    body       varchar(500) not null,
+    severity   varchar(16)  not null default 'info',
+    created_by int          not null,
+    created_at datetime     not null default current_timestamp,
+    expires_at datetime,
+    primary key (alert_id),
+    foreign key (created_by) references users (user_id)
+);
+
+create index idx_alerts_expires on alerts (expires_at);
+create index idx_alerts_created on alerts (created_at);
+
+-- -----------------------------------------------------------------------------
+-- incidents : rider-submitted issue reports, with admin status workflow
+-- -----------------------------------------------------------------------------
+create table incidents (
+    incident_id int          not null auto_increment,
+    reporter_id int          not null,
+    category    varchar(32)  not null,
+    location    varchar(120),
+    description varchar(1000) not null,
+    status      varchar(16)  not null default 'open',
+    created_at  datetime     not null default current_timestamp,
+    primary key (incident_id),
+    foreign key (reporter_id) references users (user_id)
+);
+
+create index idx_incidents_status  on incidents (status);
+create index idx_incidents_created on incidents (created_at);
 
 -- Backfill from users.role
 insert into user_roles (user_id, role)

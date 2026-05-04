@@ -1,168 +1,289 @@
 # Sewanee Transit
 
 A live shuttle tracking web app for the University of the South. Riders see
-where the buses are right now and roughly when they'll get to a stop. Drivers
-push GPS pings while they're driving. Admins manage routes, alerts, and
-incident reports.
+where the buses are right now and roughly when they'll get to a stop.
+Drivers push GPS pings while they're driving. Admins manage routes, alerts,
+and incident reports.
 
 Built for CSCI 284 (Databases with Web Applications), Spring 2026.
 
 Author: Amyun Ghimire
 
 
+## Live site
+
+https://curvy-unsoiled-quarterly.ngrok-free.dev 
+
+If the live link is unavailable, the project runs locally in a few minutes,
+see the Setup section below. Test accounts and credentials are listed under
+"Test accounts."
+
+
 ## What it does
 
-* Live map of every shuttle that's currently running a trip. Markers update
-  every few seconds.
-* Distance and ETA from your location to the nearest shuttle, computed with
-  the Haversine formula on the server.
-* Schedule page that lists every active route with its stops in order.
-* Trip history with filters (date range, route, shuttle). Past trips are
-  drawn as polylines on the map.
-* Driver page for starting and ending trips and posting GPS pings.
-* Three roles (rider, driver, admin) with a join table so one user can have
-  more than one role and switch modes from the nav.
-* Incident reports for any signed-in user, with an admin inbox for triage.
-* System alerts (info / warning / critical) that admins can publish.
-* Werkzeug password hashing, regex validation on usernames/passwords/emails,
-  Flask sessions for auth.
+* Live map of every shuttle currently running a trip. Markers update every
+  five seconds without a page reload.
+* "Nearest shuttle" widget showing distance, walking time, and ETA from the
+  rider's current GPS position. Distance is computed on the server using
+  the Haversine formula for great-circle distance on a sphere.
+* Schedule page listing every active route with its stops in order and the
+  expected minute each stop is reached.
+* Trip history page with filters by date range, route, and shuttle. Past
+  trips are drawn as colored polylines on the map.
+* Driver dashboard for starting and ending trips. While a trip is active,
+  the browser sends a GPS ping every five seconds; the page survives a
+  refresh by resuming any in-progress trip from the database.
+* Three roles (rider, driver, admin) backed by a `user_roles` join table so
+  one user can hold multiple roles and switch modes from the navbar.
+* Incident reports for any signed-in user, with an admin inbox for triage
+  (open / reviewing / resolved).
+* System alerts (info / warning / critical) that admins publish from the
+  homepage and delete from the admin dashboard.
+* Werkzeug PBKDF2-SHA256 password hashing, parameterized SQL queries, regex
+  validation on usernames / passwords / emails, and signed-cookie sessions
+  for authentication.
 
 
 ## Stack
 
 * Python 3.9+ and Flask
 * MySQL / MariaDB, accessed through `mysql-connector-python` with a small
-  connection pool in `db.py`
-* Jinja2 templates, Tailwind via CDN, Leaflet for the map, plain JS
-* `python-dotenv` for config
+  connection pool defined in `db.py`
+* Jinja2 templates, plain JavaScript, Leaflet for the map, Tailwind CSS via
+  CDN for styling
+* `python-dotenv` for loading config from a `.env` file
 
 
 ## Files
 
 ```
-app.py              all Flask routes, auth, and the geo helpers
-db.py               connection pool plus query / query_one / execute
-db-build.sql        full schema and seed data
+app.py              all Flask routes, auth helpers, geo helpers
+db.py               connection pool plus query / query_one / execute helpers
+db-build.sql        full schema and seed data - drop, create, populate
 seed_passwords.py   one-shot script to set real password hashes after seeding
 queries.sql         the five non-trivial queries from the milestone rubric
-requirements.txt
-README.md
-templates/          base, index, landing, login, register, view, schedule,
-                    history, track, admin
+requirements.txt    Python dependencies
+README.md           this file
+.env.example        config template - copy to .env and fill in real values
+
+templates/          Jinja2 templates
+  base.html         shared layout: navbar, footer, flash messages
+  landing.html      homepage for logged-out users
+  index.html        homepage for logged-in users
+  login.html        sign-in (separate tabs for student/staff vs driver/admin)
+  register.html     account creation
+  view.html         rider's live map
+  schedule.html     static route schedule
+  history.html      past trips visualized on the map
+  track.html        driver dashboard
+  admin.html        admin dashboard with the rubric queries
+
 static/
-  style.css
-  view.js, schedule.js, history.js, track.js
-  img/              campus photo, app screenshots, bus icon
+  css/style.css     custom styles (animations, Leaflet overrides, modals)
+  js/view.js        rider map: poll /api/shuttles/live every 5s
+  js/schedule.js    schedule page: fetch and render route data
+  js/history.js     history page: draw past-trip polylines
+  js/track.js       driver page: GPS streaming loop
 ```
 
 
 ## Setup
 
-1. Install the Python deps:
+### 1. Install Python dependencies
 
-   ```
-   python -m venv .venv
-   .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+From the project root:
 
-2. Make a `.env` file in the project root with your MySQL info:
+```
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS / Linux
+pip install -r requirements.txt
+```
 
-   ```
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=your_password
-   DB_NAME=sewanee_transit
-   FLASK_SECRET_KEY=anything-random
-   ```
+### 2. Configure your environment
 
-3. Build the schema and seed data:
+Copy `.env.example` to `.env` and fill in your local MySQL credentials:
 
-   ```
-   mysql -u root -p < db-build.sql
-   ```
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=sewanee_transit
+FLASK_SECRET_KEY=any-long-random-string
+```
 
-4. Set real passwords on the seeded accounts:
+To generate a random secret key:
 
-   ```
-   python seed_passwords.py
-   ```
+```
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
-   Every seeded user ends up with the password `Password1`.
+### 3. Build the schema and seed data
 
-5. Run it:
+First create the database (one-time setup):
 
-   ```
-   flask --app app run --debug
-   ```
+```
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sewanee_transit;"
+```
 
-   Then open http://localhost:5000.
+Then load the schema and seed data:
 
+```
+mysql -u root -p sewanee_transit < db-build.sql
+```
+
+On Windows PowerShell, the `<` operator isn't supported. Use this instead:
+
+```
+Get-Content db-build.sql | mysql -u root -p sewanee_transit
+```
+
+### 4. Set real password hashes on the seeded accounts
+
+```
+python seed_passwords.py
+```
+
+Every seeded user ends up with the password `Password1`.
+
+### 5. Run the app
+
+```
+flask --app app run --debug
+```
+
+Then open `http://localhost:5000` in your browser.
+
+---
+
+## Deployment Pipeline & Network Routing (Ngrok)
+Due to institutional security protocols, the university's Linux server blocks inbound external HTTP requests, preventing the frontend web server from communicating directly with the backend API. To bypass this, I engineered a custom deployment pipeline:
+
+
+* **Reverse-Proxy Tunneling:** I utilize an **Ngrok** tunnel to securely expose the local Flask server port (5000) on University Lab Computer to the public internet, creating a bridge through the firewall.
+
+* **System Constraints:** The live database connection is dependent on the Ngrok process remaining actively running on the host Linux machine. If the live operational link above renders the UI but fails to load data, it indicates the proxy tunnel has been spun down for the day.
+
+---
 
 ## Test accounts
 
-After step 4, all of these use password `Password1`:
+After step 4, all of these use the password `Password1`:
 
-* `jsmith1`  (rider)    Jordan Smith
-* `mpatel2`  (rider)    Maya Patel
-* `pgarcia5` (driver)   Paulo Garcia
-* `admin0`   (admin)    Amyun Ghimire
+| Username   | Role   | Full name      | Login tab        |
+|------------|--------|----------------|------------------|
+| `jsmith1`  | rider  | Jordan Smith   | Student / Staff  |
+| `mpatel2`  | rider  | Maya Patel     | Student / Staff  |
+| `pgarcia5` | driver | Paulo Garcia   | Driver / Admin   |
+| `admin0`   | admin  | Amyun Ghimire  | Driver / Admin   |
 
-On the login page, use the "Student / Staff" tab for the riders and the
-"Driver / Admin" tab for the other two.
+The admin account also has driver and rider roles, so you can use the
+"switch mode" menu in the navbar to demo all three views from one login.
+
+
+## Database schema
+
+Ten tables total. Foreign keys and indexes are defined in `db-build.sql`.
+
+| Table         | Purpose                                                      |
+|---------------|--------------------------------------------------------------|
+| `users`       | One row per account. Username, hashed password, role, email. |
+| `user_roles`  | Junction table: a user can hold multiple roles.              |
+| `shuttles`    | Physical vehicles (name, plate, capacity, status).           |
+| `routes`      | Named loops (e.g. "Tiger Loop").                             |
+| `stops`       | Named pickup locations with lat/lng.                         |
+| `route_stops` | Junction table: which stops are on which route, in order.   |
+| `trips`       | One row per actual run (driver, shuttle, route, start/end). |
+| `locations`   | GPS pings — about 360 rows per 30-minute trip.               |
+| `alerts`      | Admin-published banners shown on the homepage.               |
+| `incidents`   | Rider-submitted issue reports with admin status workflow.    |
 
 
 ## API endpoints
 
-The main ones, in case you want to poke around:
+The main ones, if you want to poke around:
 
-* `GET  /api/shuttles/live`         live shuttles with bearing
-* `GET  /api/shuttles/nearest`      nearest shuttle to a lat/lng
-* `POST /api/trips/start`           driver starts a trip
-* `POST /api/trips/<id>/ping`       driver posts a GPS sample
-* `POST /api/trips/<id>/end`        driver ends the trip
-* `GET  /api/history`               past trips, filterable
-* `GET  /api/routes/<id>`           one route plus its ordered stops
-* `GET  /api/stops`                 all stops
-* `POST /api/incidents`             file an incident
-* `POST /api/alerts`                admin publishes an alert
+| Method | Path                          | Purpose                            |
+|--------|-------------------------------|------------------------------------|
+| GET    | `/api/shuttles/live`          | All in-service shuttles + bearings |
+| GET    | `/api/shuttles/nearest`       | Closest shuttle to a given lat/lng |
+| GET    | `/api/stops`                  | All shuttle stops                  |
+| GET    | `/api/routes/<id>`            | One route + its ordered stops      |
+| GET    | `/api/history?days=N`         | Past trips, filterable             |
+| POST   | `/api/trips/start`            | Driver starts a trip               |
+| POST   | `/api/trips/<id>/ping`        | Driver posts a GPS sample          |
+| POST   | `/api/trips/<id>/end`         | Driver ends a trip                 |
+| POST   | `/api/incidents`              | Any signed-in user files a report  |
+| POST   | `/api/incidents/<id>/status`  | Admin updates report status        |
+| POST   | `/api/alerts`                 | Admin publishes an alert           |
+| POST   | `/api/alerts/<id>/delete`     | Admin deletes an alert             |
 
 
-## Validation
+## Input validation
 
-* Usernames must match `^[A-Za-z][A-Za-z0-9_]{2,30}[0-9]$`. Start with a
-  letter, end with a digit, 4 to 32 chars total, letters/digits/underscores
-  only.
-* Passwords need at least 8 chars, with at least one letter and one digit.
-* Emails: simple `something@something.something` regex, lowercased before
-  saving.
+All user input is validated server-side with regular expressions:
+
+* **Username:** `^[A-Za-z][A-Za-z0-9_]{2,30}[0-9]$`
+  Starts with a letter, ends with a digit, 4–32 characters total, only
+  letters / digits / underscores in between.
+* **Password:** at least 8 characters, with at least one letter and at
+  least one digit. Hashed with `werkzeug.security.generate_password_hash`
+  before storage — the plaintext never touches the database.
+* **Email:** simple `something@something.something` regex, lowercased
+  before insert. The `unique` constraint on `users.email` prevents
+  duplicates at the database level.
 
 
 ## Accessibility references
 
-The styling decisions in `style.css` were checked against:
+Styling decisions in `style.css` were checked against:
 
-1. WebAIM Contrast Checker (https://webaim.org/resources/contrastchecker/).
-   Used to confirm Sewanee purple #582C83 on white passes WCAG AA, and
-   that the gold #C8A051 is only paired with white text on dark backgrounds.
+1. **WebAIM Contrast Checker** — confirmed Sewanee purple `#582C83` on
+   white passes WCAG AA contrast, and that the gold `#C8A051` is only ever
+   used with white text on dark backgrounds.
+   <https://webaim.org/resources/contrastchecker/>
+2. **MDN — ARIA: Roles, States, and Properties** — used for `aria-label`
+   on icon-only buttons (the mobile hamburger) and `aria-hidden` on
+   decorative images.
+   <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA>
+3. **W3C WCAG 2.1 Quick Reference** — used as a checklist: body text at
+   14px or larger, never use color alone to convey state, always include
+   alt text on meaningful images.
+   <https://www.w3.org/WAI/WCAG21/quickref/>
 
-2. MDN, ARIA: Roles, States, and Properties
-   (https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA).
-   Used for `aria-label` on icon-only buttons (the mobile hamburger) and
-   `aria-hidden` on decorative images.
 
-3. W3C WCAG 2.1 Quick Reference (https://www.w3.org/WAI/WCAG21/quickref/).
-   Used as a checklist: keep body text at 14px or larger, never use color
-   alone to convey state, and always include alt text on meaningful images.
+## Notes for graders
+
+* **Tailwind is loaded from a CDN** (`cdn.tailwindcss.com`). The browser
+  console will print a warning saying not to use this in production. For a
+  class project this is fine; the production fix is to install Tailwind
+  via npm and run a build step, which would add Node.js to the toolchain
+  and is out of scope for a database course.
+* **An internet connection is needed** the first time the site loads, so
+  Tailwind, Leaflet, and Google Fonts can be fetched from their CDNs.
+* **Geolocation requires HTTPS** in modern browsers, with one exception:
+  `localhost` is treated as secure, so GPS works fine for local
+  development without a TLS certificate.
+* **Database resets:** if you re-run `db-build.sql` while you have an open
+  browser session, sign out and sign back in. Your old session cookie
+  still references the previous `user_id`, which no longer exists in the
+  rebuilt `users` table — any database write will fail with a foreign-key
+  error until the session is refreshed.
 
 
-## Notes
+## Known limitations
 
-Tailwind is loaded from the CDN (`cdn.tailwindcss.com`). The browser will
-print a warning saying not to use it in production. For a class submission
-this is fine; the production fix is to install Tailwind via npm and run a
-build step, which adds Node.js to the toolchain and isn't worth it here.
+These are things that work for the demo but would need attention before
+any real deployment:
 
-An internet connection is needed to load Tailwind, Leaflet, and Google
-Fonts the first time the page is opened.
+* If a driver closes the browser mid-trip without hitting "End Trip," the
+  trip stays in `in_progress` status indefinitely. A scheduled cleanup job
+  (close any trip with no pings in the last hour) would fix this.
+* GPS accuracy is recorded but not filtered. A real production system
+  would discard pings with accuracy worse than ~50m or apply a Kalman
+  filter to smooth the path.
+* The "delayed / on-time" classification compares total trip duration to
+  total scheduled duration. A more sophisticated version would compare
+  each GPS ping to the expected position at that moment, so mid-route
+  delays are visible.

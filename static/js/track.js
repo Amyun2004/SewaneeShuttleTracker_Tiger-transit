@@ -12,7 +12,7 @@
 // =========================================
 
 // ---------- CONFIG ----------
-const PING_INTERVAL_MS  = 5000;      // POST a ping every 5s
+const PING_INTERVAL_MS  = 2000;      // POST a ping every 5s
 
 // Sewanee campus center (fallback view if no GPS yet)
 const CAMPUS_CENTER = [35.2034, -85.9210];
