@@ -236,7 +236,10 @@ All user input is validated server-side with regular expressions:
 
 
 ## Live Demo
-`Shuttle_Tracker\tiger-transit\assets\video\LiveDemo.mp4`
+
+A short walkthrough showing the rider's live map, the driver's GPS streaming dashboard, and the admin dashboard with system alerts and incident triage.
+
+[Watch the demo video on Google Drive →](https://drive.google.com/file/d/1mrMnIjybKcF0Tk4ju5mpqxN0chgxpKWE/view?usp=sharing)
 
 ## Accessibility references
 
