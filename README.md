@@ -7,7 +7,7 @@ and incident reports.
 
 Built for CSCI 284 (Databases with Web Applications), Spring 2026.
 
-Author: Amyun Ghimire
+Author: Amyun Ghimire, Anthony Saravia
 
 
 ## Live site
